@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct LogInView: View {
     
     @State private var login: String = ""
     @State private var password: String = ""
@@ -22,6 +22,7 @@ struct ContentView: View {
                 .fontWeight(.heavy)
             TextField("Login", text: $login)
                 .textFieldStyle(.roundedBorder)
+                .foregroundColor(Color)
            secureField
             Button("Log In") {
                 print("Log In with \(login) and \(password)")
@@ -56,5 +57,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    LogInView()
 }
