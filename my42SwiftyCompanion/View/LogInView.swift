@@ -14,12 +14,12 @@ struct LogInView: View {
     var body: some View {
         
         if authManager.isLoading {
-            ProgressView("Connexion en cours...")
+            ProgressView("Connecting to your 42Profile...")
         } else if authManager.isAuthenticated, let user = authManager.user {
             VStack {
                 UserProfileView(user: user)
                 
-                Button("Se déconnecter") {
+                Button("Log out") {
                     authManager.logout()
                 }
                 .foregroundColor(.red)
