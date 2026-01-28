@@ -1,0 +1,160 @@
+//
+//  Authentification.swift
+//  my42SwiftyCompanion
+//
+//  Created by Balkis on 28/01/2026.
+//
+
+import Foundation
+import AuthenticationServices
+
+class Auth42Manager: NSObject, ObservableObject {
+    @Published var user: UserProfile?
+    @Published var isAuthenticated = false
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+    
+    private let clientUID = "u-s4t2ud-0b58e1ffe69ca96798158abef18fed66e66d40916bb4d678a8a4c415f4b28631"
+    private let clientSecret = "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"
+    private let redirectURI = "my42SwiftyCompanion://oauth-callback"
+    
+    private let authURL = "https://api.intra.42.fr/oauth/authorize"
+    private let tokenURL = "https://api.intra.42.fr/oauth/token"
+    private let apiURL = "https://api.intra.42.fr/v2"
+    
+    private var accessToken: String?
+    
+    // Authentification
+    func authenticate() {
+        isLoading = true
+        errorMessage = nil
+        
+        var components = URLComponents(string: authURL)!
+        components.queryItems = [
+            URLQueryItem(name: "client_id", value: clientUID),
+            URLQueryItem(name: "redirect_uri", value: redirectURI),
+            URLQueryItem(name: "response_type", value: "code"),
+            URLQueryItem(name: "scope", value: "public")
+        ]
+        
+        guard let url = components.url else { return }
+        
+        let session = ASWebAuthenticationSession(
+            url: url,
+            callbackURLScheme: redirectURI.components(separatedBy: ":").first
+        ) { [weak self] callbackURL, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                self.isLoading = false
+                self.errorMessage = error.localizedDescription
+                return
+            }
+            
+            guard let callbackURL = callbackURL,
+                  let code = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false)?
+                    .queryItems?.first(where: { $0.name == "code" })?.value else {
+                self.isLoading = false
+                self.errorMessage = "Code d'autorisation non trouvé"
+                return
+            }
+            
+            self.exchangeCodeForToken(code: code)
+        }
+        
+        session.presentationContextProvider = self
+        session.prefersEphemeralWebBrowserSession = false
+        session.start()
+    }
+    
+    // Échanger le code contre un token
+    private func exchangeCodeForToken(code: String) {
+        var request = URLRequest(url: URL(string: tokenURL)!)
+        request.httpMethod = "POST"
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        
+        let params = [
+            "grant_type": "authorization_code",
+            "client_id": clientUID,
+            "client_secret": clientSecret,
+            "code": code,
+            "redirect_uri": redirectURI
+        ]
+        
+        request.httpBody = params.map { "\($0.key)=\($0.value)" }
+            .joined(separator: "&")
+            .data(using: .utf8)
+        
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                if let error = error {
+                    self.isLoading = false
+                    self.errorMessage = error.localizedDescription
+                    return
+                }
+                
+                guard let data = data,
+                      let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                      let token = json["access_token"] as? String else {
+                    self.isLoading = false
+                    self.errorMessage = "Token non reçu"
+                    return
+                }
+                print("token is \(token)")
+                self.accessToken = token
+                self.fetchUserData()
+            }
+        }.resume()
+    }
+    
+    // Récupérer les données de l'utilisateur
+    private func fetchUserData() {
+        guard let token = accessToken else { return }
+        
+        var request = URLRequest(url: URL(string: "\(apiURL)/me")!)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                if let error = error {
+                    self.errorMessage = error.localizedDescription
+                    return
+                }
+                
+                guard let data = data else {
+                    self.errorMessage = "Pas de données reçues"
+                    return
+                }
+                
+                do {
+                    let user = try JSONDecoder().decode(UserProfile.self, from: data)
+                    self.user = user
+                    self.isAuthenticated = true
+                } catch {
+                    self.errorMessage = "Erreur de décodage: \(error)"
+                    print(error)
+                }
+            }
+        }.resume()
+    }
+    
+    // Déconnexion
+    func logout() {
+        accessToken = nil
+        user = nil
+        isAuthenticated = false
+    }
+}
+
+// MARK: - ASWebAuthenticationPresentationContextProviding
+extension Auth42Manager: ASWebAuthenticationPresentationContextProviding {
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        return ASPresentationAnchor()
+    }
+}
