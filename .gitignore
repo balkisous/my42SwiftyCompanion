@@ -1,0 +1,21 @@
+# Xcode
+xcuserdata/
+*.xcworkspace
+DerivedData/
+build/
+
+# Swift Package Manager
+.swiftpm
+.build/
+Packages/
+
+# CocoaPods
+Pods/
+
+# Secrets
+Config.xcconfig
+Secrets.plist
+*.env
+
+# OS
+.DS_Store
