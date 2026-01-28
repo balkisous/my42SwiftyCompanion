@@ -17,7 +17,7 @@ enum Colors {
     case backgroundbuttonColorError
     case foregroundColorError
     
-    var colors : Color {
+    var color : Color {
         switch self {
         case .backgroundColor:
             return Color(hex: 0x0FEFAE0, opacity: 1)

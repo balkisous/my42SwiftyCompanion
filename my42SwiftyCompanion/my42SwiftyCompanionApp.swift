@@ -11,7 +11,11 @@ import SwiftUI
 struct my42SwiftyCompanionApp: App {
     var body: some Scene {
         WindowGroup {
-            LogInView()
+            ZStack {
+                Colors.backgroundColor.color
+                    .ignoresSafeArea()
+                LogInView()
+            }
         }
     }
 }

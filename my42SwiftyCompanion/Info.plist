@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>UIAppFonts</key>
+	<array>
+		<string>LisuBosa-ExtraBold.tff</string>
+		<string>LisuBosa-BlackItalic.tff</string>
+		<string>LisuBosa-Light.ttf</string>
+		<string>LisuBosa-Black.ttf</string>
+		<string>LisuBosa-Bold.tff</string>
+		<string>LisuBosa-BoldItalic.tff</string>
+		<string>LisuBosa-Italic.ttf</string>
+		<string>LisuBosa-LightItalic.ttf</string>
+		<string>LisuBosa-Regular.ttf</string>
+		<string>LisuBosa-SemiBold.ttf</string>
+	</array>
+</dict>
+</plist>
