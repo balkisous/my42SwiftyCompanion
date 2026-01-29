@@ -12,7 +12,6 @@ struct UserProfile: Codable {
     
     let login: String
     let email: String
-    let phone: String?
     let location: String?
     let wallet: Int
     let correctionPoint: Int
@@ -21,7 +20,7 @@ struct UserProfile: Codable {
     let projectsUsers: [ProjectUser]
     
     enum CodingKeys: String, CodingKey {
-        case login, email, phone, location, wallet, image
+        case login, email, location, wallet, image
         case correctionPoint = "correction_point"
         case cursusUsers = "cursus_users"
         case projectsUsers = "projects_users"
@@ -92,25 +91,19 @@ extension UserProfile {
     }
 }
 
-//// MARK: - Usage Examples
-//extension UserProfile {
-//    // Decode from Data
-//    static func fromData(_ data: Data) -> Result<UserProfile, Error> {
-//        do {
-//            let user = try decode(from: data)
-//            return .success(user)
-//        } catch {
-//            return .failure(error)
-//        }
-//    }
-//    
-//    // Decode from JSON String
-//    static func fromJSON(_ json: String) -> Result<UserProfile, Error> {
-//        do {
-//            let user = try decode(from: json)
-//            return .success(user)
-//        } catch {
-//            return .failure(error)
-//        }
-//    }
-//}
+// MARK: - Utils
+extension UserProfile {
+    func projectStatus(for project: ProjectUser) -> String {
+        switch project.status {
+        case "finished":
+            return "✅"
+        case "waiting_for_correction":
+            return "⏸️"
+        case "in_progress":
+            return "⏳"
+        default:
+            ""
+        }
+        return ""
+    }
+}

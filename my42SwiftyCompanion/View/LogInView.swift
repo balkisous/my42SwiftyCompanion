@@ -9,6 +9,8 @@ import SwiftUI
 
 struct LogInView: View {
     
+    @State private var isError = false
+    
     @StateObject private var authManager = Auth42Manager()
     
     var body: some View {
@@ -17,7 +19,7 @@ struct LogInView: View {
             ProgressView("Connecting to your 42Profile...")
         } else if authManager.isAuthenticated, let user = authManager.user {
             VStack {
-                UserProfileView(user: user)
+                ProfileView(user: user)
                 
                 Button("Log out") {
                     authManager.logout()
@@ -29,7 +31,6 @@ struct LogInView: View {
         } else {
             VStack (spacing: 30) {
                 titleView
-                
                 Image("42ParisLogo")
                     .imageScale(.large)
                     .foregroundStyle(.tint)
@@ -38,6 +39,29 @@ struct LogInView: View {
                 logInButton
             }
             .padding()
+//            .sheet(isPresented: $authManager.isError , content: {
+//                Color.black.opacity(0.4)
+//                    .ignoresSafeArea()
+//                    .onTapGesture {
+//                        authManager.isError = false
+//                    }
+//                ErrorPopUpView(title: "Error to Login", subtitle: authManager.errorMessage!) {
+//                    authManager.isError.toggle()
+//                }
+//                .background(Color.white)
+//                .cornerRadius(15)
+//                .shadow(radius: 20)
+//                .padding(40)
+//            })
+            .alert("Error to Login", isPresented: $authManager.isError) {
+                Button("Dismiss", role: .cancel) {
+                    authManager.isError = false
+                }
+            } message: {
+                Text(authManager.errorMessage ?? "Unknown error")
+            }
+            .transition(.scale.combined(with: .opacity))
+            .animation(.spring(), value: authManager.isError)
         }
         
     }
@@ -70,101 +94,6 @@ struct LogInView: View {
     
 }
 
-
-struct UserProfileView: View {
-    let user: UserProfile
-    
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                // Profile Header
-                HStack {
-                    AsyncImage(url: URL(string: user.profileImage)) { image in
-                        image.resizable()
-                    } placeholder: {
-                        Color.gray
-                    }
-                    .frame(width: 80, height: 80)
-                    .clipShape(Circle())
-                    
-                    VStack(alignment: .leading) {
-                        Text(user.login)
-                            .font(.title)
-                            .bold()
-                        Text(user.email)
-                            .font(.caption)
-                        Text("Level \(String(format: "%.1f", user.level))")
-                    }
-                }
-                
-                Divider()
-                
-                // Info
-                VStack(alignment: .leading, spacing: 8) {
-                    InfoRow(icon: "📍", text: user.location ?? "Offline")
-                    InfoRow(icon: "💰", text: "Wallet: \(user.wallet)")
-                    InfoRow(icon: "⭐", text: "Evaluations: \(user.correctionPoint)")
-                    InfoRow(icon: "📱", text: user.phone ?? "N/A")
-                }
-                
-                Divider()
-                
-                // Skills
-                Text("Skills")
-                    .font(.headline)
-                
-                ForEach(user.skills, id: \.name) { skill in
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text(skill.name)
-                            Spacer()
-                            Text("\(String(format: "%.1f%%", skill.percentage))")
-                                .foregroundColor(.gray)
-                        }
-                        .font(.subheadline)
-                        
-                        ProgressView(value: skill.percentage, total: 100)
-                            .tint(.blue)
-                    }
-                }
-                
-                Divider()
-                
-                // Projects
-                Text("Projects")
-                    .font(.headline)
-                
-                ForEach(user.projectsUsers, id: \.project.name) { project in
-                    HStack {
-                        Text(project.isPassed ? "✅" : project.isFailed ? "❌" : "⏳")
-                        Text(project.project.name)
-                        Spacer()
-                        Text("\(project.finalMark ?? 0)/100")
-                            .foregroundColor(.gray)
-                    }
-                    .font(.subheadline)
-                }
-            }
-            .padding()
-        }
-    }
-}
-
-struct InfoRow: View {
-    let icon: String
-    let text: String
-    
-    var body: some View {
-        HStack {
-            Text(icon)
-            Text(text)
-        }
-    }
-}
-
 #Preview {
     LogInView()
 }
-
-// redirect URL
-// my42SwiftyCompanion://oauth-callback

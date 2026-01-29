@@ -7,12 +7,14 @@
 
 import Foundation
 import AuthenticationServices
+import SwiftUI
 
 class Auth42Manager: NSObject, ObservableObject {
     @Published var user: UserProfile?
     @Published var isAuthenticated = false
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var isError = false
     
     private let clientUID = "u-s4t2ud-0b58e1ffe69ca96798158abef18fed66e66d40916bb4d678a8a4c415f4b28631"
     private let clientSecret = "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"
@@ -48,6 +50,7 @@ class Auth42Manager: NSObject, ObservableObject {
             if let error = error {
                 self.isLoading = false
                 self.errorMessage = error.localizedDescription
+                self.isError = true
                 return
             }
             
@@ -56,6 +59,7 @@ class Auth42Manager: NSObject, ObservableObject {
                     .queryItems?.first(where: { $0.name == "code" })?.value else {
                 self.isLoading = false
                 self.errorMessage = "Code d'autorisation non trouvé"
+                self.isError = true
                 return
             }
             
@@ -92,6 +96,7 @@ class Auth42Manager: NSObject, ObservableObject {
                 if let error = error {
                     self.isLoading = false
                     self.errorMessage = error.localizedDescription
+                    self.isError = true
                     return
                 }
                 
@@ -100,6 +105,7 @@ class Auth42Manager: NSObject, ObservableObject {
                       let token = json["access_token"] as? String else {
                     self.isLoading = false
                     self.errorMessage = "Token non reçu"
+                    self.isError = true
                     return
                 }
                 print("token is \(token)")
@@ -124,11 +130,13 @@ class Auth42Manager: NSObject, ObservableObject {
                 
                 if let error = error {
                     self.errorMessage = error.localizedDescription
+                    self.isError = true
                     return
                 }
                 
                 guard let data = data else {
                     self.errorMessage = "Pas de données reçues"
+                    self.isError = true
                     return
                 }
                 
@@ -138,6 +146,7 @@ class Auth42Manager: NSObject, ObservableObject {
                     self.isAuthenticated = true
                 } catch {
                     self.errorMessage = "Erreur de décodage: \(error)"
+                    self.isError = true
                     print(error)
                 }
             }
