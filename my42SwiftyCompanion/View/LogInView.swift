@@ -30,7 +30,9 @@ struct LogInView: View {
             
         } else {
             VStack (spacing: 30) {
+                
                 titleView
+                
                 Image("42ParisLogo")
                     .imageScale(.large)
                     .foregroundStyle(.tint)
@@ -39,31 +41,17 @@ struct LogInView: View {
                 logInButton
             }
             .padding()
-//            .sheet(isPresented: $authManager.isError , content: {
-//                Color.black.opacity(0.4)
-//                    .ignoresSafeArea()
-//                    .onTapGesture {
-//                        authManager.isError = false
-//                    }
-//                ErrorPopUpView(title: "Error to Login", subtitle: authManager.errorMessage!) {
-//                    authManager.isError.toggle()
-//                }
-//                .background(Color.white)
-//                .cornerRadius(15)
-//                .shadow(radius: 20)
-//                .padding(40)
-//            })
             .alert("Error to Login", isPresented: $authManager.isError) {
                 Button("Dismiss", role: .cancel) {
                     authManager.isError = false
                 }
             } message: {
-                Text(authManager.errorMessage ?? "Unknown error")
+                Text(authManager.errorMessage ?? "Unknown Error")
             }
+            .tint(.red)
             .transition(.scale.combined(with: .opacity))
             .animation(.spring(), value: authManager.isError)
         }
-        
     }
     
     var titleView : some View {
@@ -88,10 +76,7 @@ struct LogInView: View {
         .foregroundColor(Colors.foregroundButtonColor.color)
         .border(Colors.foregroundButtonColor.color, width: 1)
         .cornerRadius(10)
-        
     }
-    
-    
 }
 
 #Preview {

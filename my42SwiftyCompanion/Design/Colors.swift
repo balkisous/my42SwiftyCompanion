@@ -18,24 +18,57 @@ enum Colors {
     case foregroundColorError
     
     var color : Color {
+//        switch self {
+//        case .backgroundColor:
+//            return Color(hex: 0x0FEFAE0, opacity: 1)
+//        case .titleColor:
+//            return Color(hex: 0x0D4A373, opacity: 1)
+//        case .filedColor:
+//            return Color(hex: 0x0FAEDCD, opacity: 1)
+//        case .foregroundColorGray:
+//            return Color(hex: 0x0CCBAA8, opacity: 1)
+//        case .backgroundbuttonColor:
+//            return Color(hex: 0x0D2BA9E, opacity: 1)
+//        case .foregroundButtonColor:
+//            return Color(hex: 0x0FAEDCD, opacity: 1)
+//        case .backgroundbuttonColorError:
+//            return Color(hex: 0x0C1121F, opacity: 1)
+//        case .foregroundColorError:
+//            return Color(hex: 0x0780000, opacity: 1)
+//        }
+        
         switch self {
-        case .backgroundColor:
-            return Color(hex: 0x0FEFAE0, opacity: 1)
-        case .titleColor:
-            return Color(hex: 0x0D4A373, opacity: 1)
-        case .filedColor:
-            return Color(hex: 0x0FAEDCD, opacity: 1)
-        case .foregroundColorGray:
-            return Color(hex: 0x0CCBAA8, opacity: 1)
-        case .backgroundbuttonColor:
-            return Color(hex: 0x0D2BA9E, opacity: 1)
-        case .foregroundButtonColor:
-            return Color(hex: 0x0FAEDCD, opacity: 1)
-        case .backgroundbuttonColorError:
-            return Color(hex: 0x0C1121F, opacity: 1)
-        case .foregroundColorError:
-            return Color(hex: 0x0780000, opacity: 1)
-        }
+                case .backgroundColor:
+                    return Color.clear // Utilisé avec le gradient
+                    
+                case .titleColor:
+                    return Color.white
+                    
+                case .filedColor:
+                    return Color.white.opacity(0.15) // Champ semi-transparent
+                    
+                case .foregroundColorGray:
+                    return Color(red: 0.7, green: 0.8, blue: 0.95) // Bleu clair grisé
+                    
+                case .backgroundbuttonColor:
+                    return Color.white
+                    
+                case .foregroundButtonColor:
+                    return Color(red: 0.0, green: 0.4, blue: 0.95) // Bleu foncé du gradient
+                    
+                case .backgroundbuttonColorError:
+                    return Color(red: 1.0, green: 0.3, blue: 0.3) // Rouge vif
+                    
+                case .foregroundColorError:
+                    return Color.white
+                }
+    }
+    
+    static var gradientColors: [Color] {
+        [
+            Color(red: 0.4, green: 0.7, blue: 1.0),   // Bleu clair
+            Color(red: 0.0, green: 0.4, blue: 0.95)   // Bleu foncé
+        ]
     }
 }
 

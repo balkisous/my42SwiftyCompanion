@@ -10,6 +10,7 @@ import SwiftUI
 struct ProfileView: View {
 
     let user: UserProfile
+    @State var openAllProjects: Bool = false
     
     var body: some View {
         ScrollView {
@@ -39,7 +40,7 @@ struct ProfileView: View {
                 // Info
                 VStack(alignment: .leading, spacing: 8) {
                     InfoRow(icon: "📍", text: user.location ?? "Offline")
-                    InfoRow(icon: "💰", text: "Wallet: \(user.wallet)")
+                    InfoRow(icon: "💰", text: "Wallet: \(user.wallet) ₳")
                     InfoRow(icon: "⭐", text: "Evaluations points: \(user.correctionPoint)")
                 }
                 

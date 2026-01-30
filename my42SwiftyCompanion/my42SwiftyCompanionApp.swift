@@ -12,8 +12,12 @@ struct my42SwiftyCompanionApp: App {
     var body: some Scene {
         WindowGroup {
             ZStack {
-                Colors.backgroundColor.color
-                    .ignoresSafeArea()
+                LinearGradient(
+                    colors: Colors.gradientColors,
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
                 LogInView()
             }
         }
