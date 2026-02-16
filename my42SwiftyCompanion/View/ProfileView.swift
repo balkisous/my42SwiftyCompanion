@@ -107,7 +107,7 @@ struct ProfileView: View {
                 HStack {
                     Spacer()
                     
-                    Button("", systemImage: "chevron.down") {
+                    Button("", systemImage: openAllProjects ? "chevron.up" : "chevron.down") {
                         openAllProjects.toggle()
                     }
                     .foregroundColor(Colors.skillFiledColor.color)
