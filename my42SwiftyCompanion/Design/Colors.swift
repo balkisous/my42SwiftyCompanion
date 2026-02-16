@@ -25,39 +25,40 @@ enum Colors {
         case .titleColor:
             return Color(red: 1.0, green: 1.0, blue: 1.0)
         
-            // Foreground Color Teal/turquoise from your cards
+            // Color Teal/turquoise
         case .foregroundColorText:
             return Color(red: 0.85, green: 0.87, blue: 0.90)
+
         
-            // Foreground gray - Light gray for secondary text
+            // Light gray for secondary text
         case .foregroundColorGray:
             return Color(red: 0.65, green: 0.68, blue: 0.72)
             
-            // Button background - Vibrant teal from your cards
+            // Vibrant teal
         case .backgroundbuttonColor:
             return Color(red: 0.35, green: 0.73, blue: 0.73)
         
-            // Button foreground - White text on teal buttons
+            // White text on teal buttons
         case .foregroundButtonColor:
             return Color(red: 1.0, green: 1.0, blue: 1.0)
             
-            // Error button background - Soft red
+            // Soft red
         case .backgroundbuttonColorError:
             return Color(red: 0.9, green: 0.35, blue: 0.35)
             
-            // Error foreground - White on red
+            // White on red
         case .foregroundColorError:
             return Color(red: 1.0, green: 1.0, blue: 1.0)
             
-            // Skill field color - Lighter teal variant
+            // Lighter teal variant
         case .skillFiledColor:
             return Color(red: 0.45, green: 0.78, blue: 0.78)
             
-            // Skill empty - Dark gray matching sidebar
+            // Dark gray matching sidebar
         case .skillEmptyColor:
             return  Color(red: 0.18, green: 0.20, blue: 0.24)
             
-            // Percentage color - Accent teal
+            // Accent teal
         case .percentageColor:
             return Color(red: 0.35, green: 0.73, blue: 0.73)
         }
