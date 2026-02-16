@@ -59,7 +59,7 @@ struct ProfileView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
                             Text(skill.name)
-                                .foregroundColor(Colors.filedColor.color)
+                                .foregroundColor(Colors.skillFiledColor.color)
                             Spacer()
                             Text("\(String(format: "%.1f%%", skill.percentage))")
                                 .foregroundColor(Colors.foregroundColorGray.color)
@@ -110,6 +110,7 @@ struct ProfileView: View {
                     Button("", systemImage: "chevron.down") {
                         openAllProjects.toggle()
                     }
+                    .foregroundColor(Colors.skillFiledColor.color)
                 }
             }
             .padding()

@@ -9,7 +9,6 @@ import SwiftUI
 
 enum Colors {
     case titleColor
-    case filedColor
     case foregroundColorText
     case foregroundColorGray
     case backgroundbuttonColor
@@ -29,9 +28,6 @@ enum Colors {
             // Foreground Color Teal/turquoise from your cards
         case .foregroundColorText:
             return Color(red: 0.85, green: 0.87, blue: 0.90)
-            
-        case .filedColor:
-            return Color(red: 0.35, green: 0.73, blue: 0.73)
         
             // Foreground gray - Light gray for secondary text
         case .foregroundColorGray:
