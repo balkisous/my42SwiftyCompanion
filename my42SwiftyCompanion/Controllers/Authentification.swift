@@ -16,6 +16,8 @@ class Auth42Manager: NSObject, ObservableObject {
     @Published var errorMessage: String?
     @Published var isError = false
     
+    private var keychainManager = KeychainManager.instance
+    
     private let clientUID = "u-s4t2ud-0b58e1ffe69ca96798158abef18fed66e66d40916bb4d678a8a4c415f4b28631"
     private let clientSecret = "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"
     private let redirectURI = "my42SwiftyCompanion://oauth-callback"
@@ -108,11 +110,28 @@ class Auth42Manager: NSObject, ObservableObject {
                     self.isError = true
                     return
                 }
-                print("token is \(token)")
                 self.accessToken = token
+                self.saveToken()
                 self.fetchUserData()
+                
             }
         }.resume()
+        
+        
+    }
+    
+    // Save token on the Keychain 
+    private func saveToken() {
+        guard let token = accessToken else { return }
+        
+        do {
+            try self.keychainManager.saveToken(token, forKey: "authentification")
+        } catch {
+            self.errorMessage = "Erreur de décodage: \(error)"
+            self.isError = true
+            print(error)
+            return
+        }
     }
     
     // Récupérer les données de l'utilisateur
