@@ -48,11 +48,11 @@ struct CursusUser: Codable {
 struct Skill: Codable {
     let name: String
     let level: Double
-    
     var percentage: Double { (level / 20.0) * 100.0 }
 }
 
-struct ProjectUser: Codable {
+struct ProjectUser: Codable, Identifiable {
+    let id = UUID()
     let finalMark: Int?
     let validated: Bool?
     let status: String
@@ -65,6 +65,14 @@ struct ProjectUser: Codable {
     
     var isPassed: Bool { validated == true }
     var isFailed: Bool { validated == false }
+    
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.finalMark = try container.decodeIfPresent(Int.self, forKey: .finalMark)
+        self.validated = try container.decodeIfPresent(Bool.self, forKey: .validated)
+        self.status = try container.decode(String.self, forKey: .status)
+        self.project = try container.decode(Project.self, forKey: .project)
+    }
 }
 
 struct Project: Codable {
@@ -102,8 +110,7 @@ extension UserProfile {
         case "in_progress":
             return "⏳"
         default:
-            ""
+            return "📊"
         }
-        return ""
     }
 }

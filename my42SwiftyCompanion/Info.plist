@@ -13,18 +13,5 @@
 			</array>
 		</dict>
 	</array>
-	<key>UIAppFonts</key>
-	<array>
-		<string>LisuBosa-ExtraBold.tff</string>
-		<string>LisuBosa-BlackItalic.tff</string>
-		<string>LisuBosa-Light.ttf</string>
-		<string>LisuBosa-Black.ttf</string>
-		<string>LisuBosa-Bold.tff</string>
-		<string>LisuBosa-BoldItalic.tff</string>
-		<string>LisuBosa-Italic.ttf</string>
-		<string>LisuBosa-LightItalic.ttf</string>
-		<string>LisuBosa-Regular.ttf</string>
-		<string>LisuBosa-SemiBold.ttf</string>
-	</array>
 </dict>
 </plist>

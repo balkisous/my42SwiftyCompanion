@@ -8,12 +8,31 @@
 import SwiftUI
 
 extension Font {
-    static let bosaRegular = Font.custom("LisuBosa-Regular", size: 20)
-    static let bosaLight = Font.custom("LisuBosa-Light", size: 20)
-    static let bosaBold = Font.custom("LisuBosa-Bold", size: 20)
-    static let bosaBlack = Font.custom("LisuBosa-Black", size: 20)
-    static let bosaItalic = Font.custom("LisuBosa-Italic", size: 20)
-    static let bosaBoldItalic = Font.custom("LisuBosa-BoldItalic", size: 20)
-    static let bosaSemiBold = Font.custom("LisuBosa-SemiBold", size: 20)
-    static let bosaLightItalic = Font.custom("LisuBosa-LightItalic", size: 20)
+        static var titleFont: Font {
+            .system(size: 28, weight: .bold, design: .serif)
+        }
+        
+        static var largeTitleFont: Font {
+            .system(size: 30, weight: .bold, design: .serif)
+        }
+        
+        static var bodyFont: Font {
+            .system(size: 18, weight: .regular, design: .serif)
+        }
+        
+        static var bodyMediumFont: Font {
+            .system(size: 20, weight: .semibold, design: .rounded)
+        }
+    
+        static var subheadlineFont: Font {
+            .system(size: 22, weight: .semibold, design: .serif)
+        }
+        
+        static var captionFont: Font {
+            .system(size: 14, weight: .regular, design: .rounded)
+        }
+        
+        static var buttonFont: Font {
+            .system(size: 17, weight: .semibold, design: .default)
+        }
 }

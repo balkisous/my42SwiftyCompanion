@@ -8,66 +8,69 @@
 import SwiftUI
 
 enum Colors {
-    case backgroundColor
     case titleColor
     case filedColor
+    case foregroundColorText
     case foregroundColorGray
     case backgroundbuttonColor
     case foregroundButtonColor
     case backgroundbuttonColorError
     case foregroundColorError
+    case skillFiledColor
+    case skillEmptyColor
+    case percentageColor
     
     var color : Color {
-//        switch self {
-//        case .backgroundColor:
-//            return Color(hex: 0x0FEFAE0, opacity: 1)
-//        case .titleColor:
-//            return Color(hex: 0x0D4A373, opacity: 1)
-//        case .filedColor:
-//            return Color(hex: 0x0FAEDCD, opacity: 1)
-//        case .foregroundColorGray:
-//            return Color(hex: 0x0CCBAA8, opacity: 1)
-//        case .backgroundbuttonColor:
-//            return Color(hex: 0x0D2BA9E, opacity: 1)
-//        case .foregroundButtonColor:
-//            return Color(hex: 0x0FAEDCD, opacity: 1)
-//        case .backgroundbuttonColorError:
-//            return Color(hex: 0x0C1121F, opacity: 1)
-//        case .foregroundColorError:
-//            return Color(hex: 0x0780000, opacity: 1)
-//        }
-        
+
         switch self {
-                case .backgroundColor:
-                    return Color.clear // Utilisé avec le gradient
-                    
-                case .titleColor:
-                    return Color.white
-                    
-                case .filedColor:
-                    return Color.white.opacity(0.15) // Champ semi-transparent
-                    
-                case .foregroundColorGray:
-                    return Color(red: 0.7, green: 0.8, blue: 0.95) // Bleu clair grisé
-                    
-                case .backgroundbuttonColor:
-                    return Color.white
-                    
-                case .foregroundButtonColor:
-                    return Color(red: 0.0, green: 0.4, blue: 0.95) // Bleu foncé du gradient
-                    
-                case .backgroundbuttonColorError:
-                    return Color(red: 1.0, green: 0.3, blue: 0.3) // Rouge vif
-                    
-                case .foregroundColorError:
-                    return Color.white
-                }
+        case .titleColor:
+            return Color(red: 1.0, green: 1.0, blue: 1.0)
+        
+            // Foreground Color Teal/turquoise from your cards
+        case .foregroundColorText:
+            return Color(red: 0.85, green: 0.87, blue: 0.90)
+            
+        case .filedColor:
+            return Color(red: 0.35, green: 0.73, blue: 0.73)
+        
+            // Foreground gray - Light gray for secondary text
+        case .foregroundColorGray:
+            return Color(red: 0.65, green: 0.68, blue: 0.72)
+            
+            // Button background - Vibrant teal from your cards
+        case .backgroundbuttonColor:
+            return Color(red: 0.35, green: 0.73, blue: 0.73)
+        
+            // Button foreground - White text on teal buttons
+        case .foregroundButtonColor:
+            return Color(red: 1.0, green: 1.0, blue: 1.0)
+            
+            // Error button background - Soft red
+        case .backgroundbuttonColorError:
+            return Color(red: 0.9, green: 0.35, blue: 0.35)
+            
+            // Error foreground - White on red
+        case .foregroundColorError:
+            return Color(red: 1.0, green: 1.0, blue: 1.0)
+            
+            // Skill field color - Lighter teal variant
+        case .skillFiledColor:
+            return Color(red: 0.45, green: 0.78, blue: 0.78)
+            
+            // Skill empty - Dark gray matching sidebar
+        case .skillEmptyColor:
+            return  Color(red: 0.18, green: 0.20, blue: 0.24)
+            
+            // Percentage color - Accent teal
+        case .percentageColor:
+            return Color(red: 0.35, green: 0.73, blue: 0.73)
+        }
     }
     
     static var gradientColors: [Color] {
         [
-            Color(red: 0.4, green: 0.7, blue: 1.0),   // Bleu clair
-            Color(red: 0.0, green: 0.4, blue: 0.95)   // Bleu foncé
+            Color(red: 0.15, green: 0.17, blue: 0.21),
+            Color(red: 0.11, green: 0.12, blue: 0.15)
         ]
     }
 }

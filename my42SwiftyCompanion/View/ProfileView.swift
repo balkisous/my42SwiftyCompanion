@@ -27,11 +27,15 @@ struct ProfileView: View {
                     
                     VStack(alignment: .leading) {
                         Text(user.login)
-                            .font(.title)
+                            .font(.titleFont)
                             .bold()
+                            .foregroundColor(Colors.titleColor.color)
                         Text(user.email)
-                            .font(.caption)
-                        Text("Level \(String(format: "%.1f", user.level))")
+                            .font(.bodyMediumFont)
+                            .foregroundColor(Colors.foregroundColorText.color)
+                        Text("Level \(String(format: "%.1f%%", user.level))")
+                            .foregroundColor(Colors.foregroundColorText.color)
+                            .font(.bodyMediumFont)
                     }
                 }
                 
@@ -48,20 +52,21 @@ struct ProfileView: View {
                 
                 // Skills
                 Text("Skills")
-                    .font(.headline)
+                    .foregroundColor(Colors.titleColor.color)
+                    .font(.subheadlineFont)
                 
                 ForEach(user.skills, id: \.name) { skill in
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
                             Text(skill.name)
+                                .foregroundColor(Colors.filedColor.color)
                             Spacer()
                             Text("\(String(format: "%.1f%%", skill.percentage))")
-                                .foregroundColor(.gray)
+                                .foregroundColor(Colors.foregroundColorGray.color)
                         }
-                        .font(.subheadline)
-                        
+                        .font(.bodyFont)
                         ProgressView(value: skill.percentage, total: 100)
-                            .tint(.blue)
+                            .tint(Colors.skillFiledColor.color)
                     }
                 }
                 
@@ -69,24 +74,49 @@ struct ProfileView: View {
                 
                 // Projects
                 Text("Projects")
-                    .font(.headline)
+                    .font(.subheadlineFont)
+                    .foregroundColor(Colors.foregroundColorText.color)
                 
-                ForEach(user.projectsUsers, id: \.project.name) { project in
-                    HStack {
-                        let _ = print("project \(project)")
-                        let status = user.projectStatus(for: project)
-                        Text("\(status) - \(project.project.name)")
-                        Spacer()
-                        Text("\(project.finalMark ?? 0)/100")
-                            .foregroundColor(.gray)
+                if openAllProjects {
+                    ForEach(user.projectsUsers, id: \.id) { project in
+                        HStack {
+                            let status = user.projectStatus(for: project)
+                            Text("\(status) - \(project.project.name)")
+                                .foregroundColor(Colors.foregroundColorText.color)
+                            Spacer()
+                            Text("\(project.finalMark ?? 0)/100")
+                                .foregroundColor(Colors.foregroundColorGray.color)
+                        }
+                        .font(.bodyFont)
                     }
-                    .font(.subheadline)
+                    
+                } else {
+                    ForEach(Array(user.projectsUsers.prefix(5))) { project in
+                            HStack {
+                            let status = user.projectStatus(for: project)
+                            Text("\(status) - \(project.project.name)")
+                                .foregroundColor(Colors.foregroundColorText.color)
+                            Spacer()
+                            Text("\(project.finalMark ?? 0)/100")
+                                .foregroundColor(Colors.foregroundColorGray.color)
+                        }
+                        .font(.bodyFont)
+                    }
+                    
+                }
+                HStack {
+                    Spacer()
+                    
+                    Button("", systemImage: "chevron.down") {
+                        openAllProjects.toggle()
+                    }
                 }
             }
             .padding()
         }
     }
 }
+
 
 struct InfoRow: View {
     let icon: String
@@ -96,6 +126,8 @@ struct InfoRow: View {
         HStack {
             Text(icon)
             Text(text)
+                .font(.bodyFont)
+                .foregroundColor(Colors.foregroundColorText.color)
         }
     }
 }

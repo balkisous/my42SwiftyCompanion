@@ -17,6 +17,8 @@ struct LogInView: View {
         
         if authManager.isLoading {
             ProgressView("Connecting to your 42Profile...")
+                .foregroundColor(Colors.foregroundColorGray.color)
+                .font(.subheadlineFont)
         } else if authManager.isAuthenticated, let user = authManager.user {
             VStack {
                 ProfileView(user: user)
@@ -24,8 +26,13 @@ struct LogInView: View {
                 Button("Log out") {
                     authManager.logout()
                 }
-                .foregroundColor(.red)
-                .buttonStyle(.plain)
+                .padding(.horizontal, 60)
+                .padding(.vertical, 10)
+                .background(Colors.backgroundbuttonColor.color)
+                .foregroundColor(Colors.foregroundColorError.color)
+                .border(Colors.foregroundButtonColor.color, width: 1)
+                .cornerRadius(10)
+                .font(.buttonFont)
             }
             
         } else {
@@ -45,6 +52,7 @@ struct LogInView: View {
                 Button("Dismiss", role: .cancel) {
                     authManager.isError = false
                 }
+                .font(.buttonFont)
             } message: {
                 Text(authManager.errorMessage ?? "Unknown Error")
             }
@@ -59,10 +67,10 @@ struct LogInView: View {
             Text("My42SwiftyCompanion")
                 .fontWeight(.bold)
                 .foregroundColor(Colors.titleColor.color)
-                .fontWidth(.standard)
+                .font(.largeTitleFont)
             Text("Your custom 42Profile App")
-                .font(.bosaBold)
-                .foregroundColor(Colors.titleColor.color)
+                .font(.bodyMediumFont)
+                .foregroundColor(Colors.foregroundColorText.color)
         }
     }
     
@@ -75,6 +83,7 @@ struct LogInView: View {
         .background(Colors.backgroundbuttonColor.color)
         .foregroundColor(Colors.foregroundButtonColor.color)
         .border(Colors.foregroundButtonColor.color, width: 1)
+        .font(.buttonFont)
         .cornerRadius(10)
     }
 }
