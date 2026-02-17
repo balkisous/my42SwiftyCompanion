@@ -16,6 +16,7 @@ Pods/
 Config.xcconfig
 Secrets.plist
 *.env
+Secrets.xcconfig
 
 # OS
 .DS_Store

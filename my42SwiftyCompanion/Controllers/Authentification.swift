@@ -18,8 +18,8 @@ class Auth42Manager: NSObject, ObservableObject {
     
     private var keychainManager = KeychainManager.instance
     
-    private let clientUID = "u-s4t2ud-0b58e1ffe69ca96798158abef18fed66e66d40916bb4d678a8a4c415f4b28631"
-    private let clientSecret = "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"
+    private let clientUID = Secrets.clientUID
+    private let clientSecret = Secrets.clientSecret
     private let redirectURI = "my42SwiftyCompanion://oauth-callback"
     
     private let authURL = "https://api.intra.42.fr/oauth/authorize"
@@ -111,7 +111,6 @@ class Auth42Manager: NSObject, ObservableObject {
                     return
                 }
                 self.accessToken = token
-                self.saveToken()
                 self.fetchUserData()
                 
             }
@@ -163,6 +162,7 @@ class Auth42Manager: NSObject, ObservableObject {
                     let user = try JSONDecoder().decode(UserProfile.self, from: data)
                     self.user = user
                     self.isAuthenticated = true
+                    self.saveToken()
                 } catch {
                     self.errorMessage = "Erreur de décodage: \(error)"
                     self.isError = true
@@ -177,6 +177,14 @@ class Auth42Manager: NSObject, ObservableObject {
         accessToken = nil
         user = nil
         isAuthenticated = false
+    }
+    
+    // CheckToken
+    func isConnect() -> Bool {
+        if let res = self.keychainManager.getToken(forKey: "authentification") {
+            return true
+        }
+        return false
     }
 }
 
