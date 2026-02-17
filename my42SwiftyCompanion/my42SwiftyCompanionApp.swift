@@ -9,6 +9,9 @@ import SwiftUI
 
 @main
 struct my42SwiftyCompanionApp: App {
+
+    @StateObject private var authManager = Auth42Manager()
+
     var body: some Scene {
         WindowGroup {
             ZStack {
@@ -18,7 +21,17 @@ struct my42SwiftyCompanionApp: App {
                     endPoint: .bottom
                 )
                 .ignoresSafeArea()
-                LogInView()
+                if authManager.isLoading {
+                    ProgressView("Connecting to your 42Profile...")
+                        .foregroundColor(Colors.foregroundColorGray.color)
+                        .font(.subheadlineFont)
+                } else if authManager.isAuthenticated, let user = authManager.user {
+                    ProfileView(user: user)
+                        .environmentObject(authManager)
+                } else {
+                    LogInView()
+                        .environmentObject(authManager)
+                }
             }
         }
     }
