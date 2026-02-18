@@ -66,8 +66,10 @@ enum Colors {
     
     static var gradientColors: [Color] {
         [
-            Color(red: 0.15, green: 0.17, blue: 0.21),
-            Color(red: 0.11, green: 0.12, blue: 0.15)
+//            Color(red: 0.15, green: 0.17, blue: 0.21),
+//            Color(red: 0.11, green: 0.12, blue: 0.15)
+            Color(hex: 0x001718),
+            Color(hex: 0x002426)
         ]
     }
 }
