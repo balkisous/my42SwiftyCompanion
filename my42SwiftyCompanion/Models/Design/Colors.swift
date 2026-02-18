@@ -16,12 +16,12 @@ enum Colors {
     case backgroundbuttonColorError
     case foregroundColorError
     case skillFiledColor
-    case skillEmptyColor
     case percentageColor
     
     var color : Color {
 
         switch self {
+            // Color white
         case .titleColor:
             return Color(red: 1.0, green: 1.0, blue: 1.0)
         
@@ -53,10 +53,6 @@ enum Colors {
             // Lighter teal variant
         case .skillFiledColor:
             return Color(red: 0.45, green: 0.78, blue: 0.78)
-            
-            // Dark gray matching sidebar
-        case .skillEmptyColor:
-            return  Color(red: 0.18, green: 0.20, blue: 0.24)
             
             // Accent teal
         case .percentageColor:

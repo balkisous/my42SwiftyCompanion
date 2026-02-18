@@ -13,7 +13,7 @@ enum Secrets {
     static func value(for key: String) -> String {
         guard let value = Bundle.main.infoDictionary?[key] as? String,
               !value.isEmpty else {
-            fatalError("⚠️ Clé '\(key)' manquante dans Secrets.xcconfig")
+            fatalError("⚠️ Key '\(key)' missing in Secrets.xcconfig")
         }
         return value
     }

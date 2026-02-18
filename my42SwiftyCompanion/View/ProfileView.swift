@@ -18,12 +18,12 @@ struct ProfileView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     // Profile Header
-                    header
+                    self.headerProfile
                     
                     Divider()
                     
                     // Info
-                    userInfos
+                    self.userInfos
                     
                     Divider()
                     
@@ -32,6 +32,7 @@ struct ProfileView: View {
                     
                     Divider()
                     
+                    // Projects
                     self.userProjects
                 }
                 .padding()
@@ -54,7 +55,7 @@ extension ProfileView {
     
     // ---------------------- Header ----------------------
 
-    var header: some View {
+    var headerProfile: some View {
         HStack {
             AsyncImage(url: URL(string: user.profileImage)) { image in
                 image.resizable()

@@ -17,6 +17,7 @@ class Auth42Manager: NSObject, ObservableObject {
     @Published var isError = false
     
     private var keychainManager = KeychainManager.instance
+    private let tokenKey = "authentification"
     
     private let clientUID = Secrets.clientUID
     private let clientSecret = Secrets.clientSecret
@@ -60,7 +61,7 @@ class Auth42Manager: NSObject, ObservableObject {
                   let code = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false)?
                     .queryItems?.first(where: { $0.name == "code" })?.value else {
                 self.isLoading = false
-                self.errorMessage = "Code d'autorisation non trouvé"
+                self.errorMessage = "Authorised code not received"
                 self.isError = true
                 return
             }
@@ -73,7 +74,7 @@ class Auth42Manager: NSObject, ObservableObject {
         session.start()
     }
     
-    // Échanger le code contre un token
+
     private func exchangeCodeForToken(code: String) {
         var request = URLRequest(url: URL(string: tokenURL)!)
         request.httpMethod = "POST"
@@ -106,13 +107,15 @@ class Auth42Manager: NSObject, ObservableObject {
                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                       let token = json["access_token"] as? String else {
                     self.isLoading = false
-                    self.errorMessage = "Token non reçu"
+                    self.errorMessage = "Token not received"
                     self.isError = true
                     return
                 }
                 self.accessToken = token
+                if !self.saveToken(for: token) {
+                    return
+                }
                 self.fetchUserData()
-                
             }
         }.resume()
         
@@ -120,20 +123,20 @@ class Auth42Manager: NSObject, ObservableObject {
     }
     
     // Save token on the Keychain 
-    private func saveToken() {
-        guard let token = accessToken else { return }
-        
+    private func saveToken(for token: String) -> Bool{
         do {
-            try self.keychainManager.saveToken(token, forKey: "authentification")
+            try self.keychainManager.saveToken(token, forKey: self.tokenKey)
+            print("Successfully saved token")
         } catch {
-            self.errorMessage = "Erreur de décodage: \(error)"
+            self.isLoading = false
+            self.errorMessage = "Error from Keychain Manager: \(error)"
             self.isError = true
             print(error)
-            return
+            return false
         }
+        return true
     }
     
-    // Récupérer les données de l'utilisateur
     private func fetchUserData() {
         guard let token = accessToken else { return }
         
@@ -162,7 +165,6 @@ class Auth42Manager: NSObject, ObservableObject {
                     let user = try JSONDecoder().decode(UserProfile.self, from: data)
                     self.user = user
                     self.isAuthenticated = true
-                    self.saveToken()
                 } catch {
                     self.errorMessage = "Erreur de décodage: \(error)"
                     self.isError = true
@@ -177,11 +179,20 @@ class Auth42Manager: NSObject, ObservableObject {
         accessToken = nil
         user = nil
         isAuthenticated = false
+        do {
+            try self.keychainManager.deleteToken(forKey: self.tokenKey)
+        } catch {
+            print(error)
+        }
     }
     
-    // CheckToken
+    // Check token if is already registered
     func isConnect() -> Bool {
-        if let res = self.keychainManager.getToken(forKey: "authentification") {
+        if let token = self.keychainManager.getToken(forKey: self.tokenKey) {
+            DispatchQueue.main.async {
+                self.accessToken = token
+                self.fetchUserData()
+            }
             return true
         }
         return false
@@ -194,3 +205,25 @@ extension Auth42Manager: ASWebAuthenticationPresentationContextProviding {
         return ASPresentationAnchor()
     }
 }
+
+//struct ScreenManager {
+//    enum screen {
+//        case availableToken(user: UserProfile)
+//        case isLoadingToken
+//        case authentificate
+//        case logIn
+//    }
+//        
+//    func screen() -> some View {
+//        switch self.screen {
+//        case 
+//        }
+//    }
+//}
+
+/**
+    if Loading == false
+    else if token already saved -> try to fetch data
+    else if autentificate
+    else logIn View
+ **/
