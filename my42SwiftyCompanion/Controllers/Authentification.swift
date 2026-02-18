@@ -17,7 +17,7 @@ class Auth42Manager: NSObject, ObservableObject {
     @Published var isError = false
     
     private var keychainManager = KeychainManager.instance
-    private let tokenKey = "authentification"
+    private let tokenKey = "authentificationToken"
     
     private let clientUID = Secrets.clientUID
     private let clientSecret = Secrets.clientSecret
@@ -29,8 +29,18 @@ class Auth42Manager: NSObject, ObservableObject {
     
     private var accessToken: String?
     
+    override init() {
+        super.init()
+        checkExistingToken()
+    }
+    
     // Authentification
     func authenticate() {
+        
+        if isAuthenticated {
+            return
+        }
+        
         isLoading = true
         errorMessage = nil
         
@@ -59,7 +69,7 @@ class Auth42Manager: NSObject, ObservableObject {
             
             guard let callbackURL = callbackURL,
                   let code = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false)?
-                    .queryItems?.first(where: { $0.name == "code" })?.value else {
+                .queryItems?.first(where: { $0.name == "code" })?.value else {
                 self.isLoading = false
                 self.errorMessage = "Authorised code not received"
                 self.isError = true
@@ -74,7 +84,7 @@ class Auth42Manager: NSObject, ObservableObject {
         session.start()
     }
     
-
+    
     private func exchangeCodeForToken(code: String) {
         var request = URLRequest(url: URL(string: tokenURL)!)
         request.httpMethod = "POST"
@@ -111,6 +121,7 @@ class Auth42Manager: NSObject, ObservableObject {
                     self.isError = true
                     return
                 }
+                
                 self.accessToken = token
                 if !self.saveToken(for: token) {
                     return
@@ -122,7 +133,7 @@ class Auth42Manager: NSObject, ObservableObject {
         
     }
     
-    // Save token on the Keychain 
+    // Save token on the Keychain
     private func saveToken(for token: String) -> Bool{
         do {
             try self.keychainManager.saveToken(token, forKey: self.tokenKey)
@@ -138,7 +149,14 @@ class Auth42Manager: NSObject, ObservableObject {
     }
     
     private func fetchUserData() {
-        guard let token = accessToken else { return }
+        guard let token = accessToken else {
+            DispatchQueue.main.async {
+                self.isLoading = false
+                self.errorMessage = "Token not found"
+                self.isError = true
+            }
+            return
+        }
         
         var request = URLRequest(url: URL(string: "\(apiURL)/me")!)
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -155,8 +173,16 @@ class Auth42Manager: NSObject, ObservableObject {
                     return
                 }
                 
+                if let httpResponse = response as? HTTPURLResponse {
+                    if httpResponse.statusCode == 401 {
+                        self.errorMessage = "Token expired, please log in again"
+                        self.isError = true
+                        self.logout()
+                        return
+                    }
+                }
                 guard let data = data else {
-                    self.errorMessage = "Pas de données reçues"
+                    self.errorMessage = "data not received"
                     self.isError = true
                     return
                 }
@@ -166,7 +192,7 @@ class Auth42Manager: NSObject, ObservableObject {
                     self.user = user
                     self.isAuthenticated = true
                 } catch {
-                    self.errorMessage = "Erreur de décodage: \(error)"
+                    self.errorMessage = "Error from decoding: \(error)"
                     self.isError = true
                     print(error)
                 }
@@ -174,7 +200,6 @@ class Auth42Manager: NSObject, ObservableObject {
         }.resume()
     }
     
-    // Déconnexion
     func logout() {
         accessToken = nil
         user = nil
@@ -186,16 +211,13 @@ class Auth42Manager: NSObject, ObservableObject {
         }
     }
     
-    // Check token if is already registered
-    func isConnect() -> Bool {
-        if let token = self.keychainManager.getToken(forKey: self.tokenKey) {
-            DispatchQueue.main.async {
-                self.accessToken = token
-                self.fetchUserData()
-            }
-            return true
+    func checkExistingToken() {
+        if let token = keychainManager.getToken(forKey: tokenKey) {
+            print("Token trouvé dans le Keychain")
+            accessToken = token
+            isLoading = true
+            fetchUserData()
         }
-        return false
     }
 }
 
@@ -205,25 +227,3 @@ extension Auth42Manager: ASWebAuthenticationPresentationContextProviding {
         return ASPresentationAnchor()
     }
 }
-
-//struct ScreenManager {
-//    enum screen {
-//        case availableToken(user: UserProfile)
-//        case isLoadingToken
-//        case authentificate
-//        case logIn
-//    }
-//        
-//    func screen() -> some View {
-//        switch self.screen {
-//        case 
-//        }
-//    }
-//}
-
-/**
-    if Loading == false
-    else if token already saved -> try to fetch data
-    else if autentificate
-    else logIn View
- **/

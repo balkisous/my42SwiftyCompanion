@@ -25,6 +25,7 @@ struct my42SwiftyCompanionApp: App {
                     ProgressView("Connecting to your 42Profile...")
                         .foregroundColor(Colors.foregroundColorGray.color)
                         .font(.subheadlineFont)
+                        .tint(Colors.foregroundColorGray.color)
                 } else if authManager.isAuthenticated, let user = authManager.user {
                     ProfileView(user: user)
                         .environmentObject(authManager)
@@ -33,6 +34,17 @@ struct my42SwiftyCompanionApp: App {
                         .environmentObject(authManager)
                 }
             }
+            .alert("Error to Login", isPresented: $authManager.isError) {
+                Button("Dismiss", role: .cancel) {
+                    authManager.isError = false
+                }
+                .font(.buttonFont)
+            } message: {
+                Text(authManager.errorMessage ?? "Unknown Error")
+            }
+            .tint(.red)
+            .transition(.scale.combined(with: .opacity))
+            .animation(.spring(), value: authManager.isError)
         }
     }
 }

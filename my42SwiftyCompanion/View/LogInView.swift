@@ -15,23 +15,6 @@ struct LogInView: View {
     
     var body: some View {
         
-        //        if authManager.isConnect(), let user = authManager.user {
-        //            VStack {
-        //                let _ = print("here in already connected")
-        //                ProfileView(user: user)
-        //
-        //                Button("Log out") {
-        //                    authManager.logout()
-        //                }
-        //                .padding(.horizontal, 60)
-        //                .padding(.vertical, 10)
-        //                .background(Colors.backgroundbuttonColor.color)
-        //                .foregroundColor(Colors.foregroundColorError.color)
-        //                .border(Colors.foregroundButtonColor.color, width: 1)
-        //                .cornerRadius(10)
-        //                .font(.buttonFont)
-        //            }
-        //
         VStack (spacing: 30) {
             
             titleView
@@ -42,19 +25,9 @@ struct LogInView: View {
                 .cornerRadius(10)
             
             logInButton
+            
         }
         .padding()
-        .alert("Error to Login", isPresented: $authManager.isError) {
-            Button("Dismiss", role: .cancel) {
-                authManager.isError = false
-            }
-            .font(.buttonFont)
-        } message: {
-            Text(authManager.errorMessage ?? "Unknown Error")
-        }
-        .tint(.red)
-        .transition(.scale.combined(with: .opacity))
-        .animation(.spring(), value: authManager.isError)
     }
     
     var titleView : some View {
