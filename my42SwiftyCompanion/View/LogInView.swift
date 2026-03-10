@@ -48,11 +48,16 @@ struct LogInView: View {
         }
         .padding(.horizontal, 60)
         .padding(.vertical, 10)
-        .background(Colors.backgroundbuttonColor.color)
-        .foregroundColor(Colors.foregroundButtonColor.color)
-        .border(Colors.foregroundButtonColor.color, width: 1)
         .font(.buttonFont)
-        .cornerRadius(10)
+        .foregroundColor(Colors.foregroundButtonColor.color)
+        .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Colors.backgroundbuttonColor.color)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Colors.foregroundButtonColor.color, lineWidth: 1)
+                    )
+            )
     }
 }
 

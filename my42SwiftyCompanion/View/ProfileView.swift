@@ -40,13 +40,18 @@ struct ProfileView: View {
             Button("Log out") {
                 authManager.logout()
             }
+            .font(.buttonFont)
             .padding(.horizontal, 60)
             .padding(.vertical, 10)
-            .background(Colors.backgroundbuttonColor.color)
-            .foregroundColor(Colors.foregroundColorError.color)
-            .border(Colors.foregroundButtonColor.color, width: 1)
-            .cornerRadius(10)
-            .font(.buttonFont)
+            .foregroundColor(Colors.foregroundButtonColor.color)
+            .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Colors.backgroundbuttonColor.color)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Colors.foregroundButtonColor.color, lineWidth: 1)
+                        )
+                )
         }
     }
 }
