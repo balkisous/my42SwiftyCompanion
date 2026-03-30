@@ -21,18 +21,19 @@ struct my42SwiftyCompanionApp: App {
                     endPoint: .bottom
                 )
                 .ignoresSafeArea()
-                if authManager.isLoading {
-                    ProgressView("Connecting to your 42Profile...")
-                        .foregroundColor(Colors.foregroundColorGray.color)
-                        .font(.subheadlineFont)
-                        .tint(Colors.foregroundColorGray.color)
-                } else if authManager.isAuthenticated, let user = authManager.user {
-                    ProfileView(user: user)
-                        .environmentObject(authManager)
-                } else {
-                    LogInView()
-                        .environmentObject(authManager)
-                }
+                HomeView()
+//                if authManager.isLoading {
+//                    ProgressView("Connecting to your 42Profile...")
+//                        .foregroundColor(Colors.foregroundColorGray.color)
+//                        .font(.subheadlineFont)
+//                        .tint(Colors.foregroundColorGray.color)
+//                } else if authManager.isAuthenticated, let user = authManager.user {
+//                    ProfileView(user: user)
+//                        .environmentObject(authManager)
+//                } else {
+//                    LogInView()
+//                        .environmentObject(authManager)
+//                }
             }
             .alert("Error to Login", isPresented: $authManager.isError) {
                 Button("Dismiss", role: .cancel) {
