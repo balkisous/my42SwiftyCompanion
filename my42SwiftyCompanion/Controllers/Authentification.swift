@@ -7,7 +7,6 @@
 
 import Foundation
 import AuthenticationServices
-import SwiftUI
 
 class Auth42Manager: NSObject, ObservableObject {
     @Published var user: UserProfile?
@@ -25,7 +24,7 @@ class Auth42Manager: NSObject, ObservableObject {
     
     private let authURL = "https://api.intra.42.fr/oauth/authorize"
     private let tokenURL = "https://api.intra.42.fr/oauth/token"
-    private let apiURL = "https://api.intra.42.fr/v2"
+    private let apiURL = "https://api.intra.42.fr/v2/users" 
     
     private var accessToken: String?
     

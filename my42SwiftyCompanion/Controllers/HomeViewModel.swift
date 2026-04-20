@@ -6,13 +6,14 @@
 //
 
 import AuthenticationServices
+import SwiftUI
 
-struct HomeViewModel {
+class HomeViewModel : ObservableObject {
     
-    var users: [UserProfile]
-    var isAuthenticated = false
-    var isLoading = false
-    var errorMessage: String?
+    @Published var users: [UsersResearch]
+    var isAuthenticated = false // -> I think is not neccessary
+    var isLoading = false // for what ??
+    var errorMessage: String? = nil
     var isError = false
     
     private var keychainManager = KeychainManager.instance
@@ -26,6 +27,10 @@ struct HomeViewModel {
     private let apiURL = "https://api.intra.42.fr/v2/users" 
     
     private var accessToken: String?
+    
+    init() {
+        self.users = [UsersResearch(id: 1, login: "tata"), UsersResearch(id: 2, login: "toto"), UsersResearch(id: 3, login: "titi")]
+    }
     
     func fetchUsers(loginPrefix: String) async throws -> [UserProfile] {
         guard let token = accessToken else {
@@ -43,10 +48,25 @@ struct HomeViewModel {
         let (data, response) = try await URLSession.shared.data(for: request)
         
         if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 401 {
-            logout()
+            self.logout()
             throw URLError(.userAuthenticationRequired)
         }
         
         return try JSONDecoder().decode([UserProfile].self, from: data)
+    }
+    
+    private func logout() {
+        accessToken = nil
+        users = []
+        isAuthenticated = false
+        do {
+            try self.keychainManager.deleteToken(forKey: self.tokenKey)
+        } catch {
+            print(error)
+        }
+    }
+    
+    public func removeUser(){
+        self.users.removeAll()
     }
 }
