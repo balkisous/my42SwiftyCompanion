@@ -28,7 +28,7 @@ struct my42SwiftyCompanionApp: App {
 //                        .font(.subheadlineFont)
 //                        .tint(Colors.foregroundColorGray.color)
 //                } else if authManager.isAuthenticated, let user = authManager.user {
-//                    ProfileView(user: user)
+//                    UserView(user: user)
 //                        .environmentObject(authManager)
 //                } else {
 //                    LogInView()

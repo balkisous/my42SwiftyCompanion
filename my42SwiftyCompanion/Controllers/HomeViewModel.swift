@@ -10,63 +10,95 @@ import SwiftUI
 
 class HomeViewModel : ObservableObject {
     
-    @Published var users: [UsersResearch]
+    @Published var users: [UsersResearch] = []
     var isAuthenticated = false // -> I think is not neccessary
     var isLoading = false // for what ??
     var errorMessage: String? = nil
     var isError = false
     
-    private var keychainManager = KeychainManager.instance
-    private let tokenKey = "authentificationToken"
+    private var keychainManager = KeychainManager.instance // -> A voir si on le garde ou pas
+    private let tokenKey = "authentificationToken" // -> A voir si on le garde ou pas
     
     private let clientUID = Secrets.clientUID
     private let clientSecret = Secrets.clientSecret
-    private let redirectURI = "my42SwiftyCompanion://oauth-callback"
     
     private let tokenURL = "https://api.intra.42.fr/oauth/token"
-    private let apiURL = "https://api.intra.42.fr/v2/users" 
+    private let apiURL = "https://api.intra.42.fr/v2/users"
     
     private var accessToken: String?
     
     init() {
-        self.users = [UsersResearch(id: 1, login: "tata"), UsersResearch(id: 2, login: "toto"), UsersResearch(id: 3, login: "titi")]
+        Task {
+            do {
+                try await self.fetchAccessToken()
+            }
+            catch {
+                print("Error to fecthch access token: \(error)")
+            }
+        }
+        
     }
     
-    func fetchUsers(loginPrefix: String) async throws -> [UserProfile] {
+    deinit {
+        self.users = []
+    }
+    
+    private func fetchAccessToken() async throws {
+        
+        let url = URL(string: tokenURL)!
+        
+        var request = URLRequest(url: url)
+        
+        request.httpMethod = "POST"
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        
+        let bodyString = "grant_type=client_credentials&client_id=\(clientUID)&client_secret=\(clientSecret)"
+        request.httpBody = bodyString.data(using: .utf8)
+                
+        let (data, _) = try await URLSession.shared.data(for: request)
+        
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let tokenResponse = try decoder.decode(TokenResponse.self, from: data)
+
+        self.accessToken = tokenResponse.accessToken
+    }
+    
+    func fetchUsers(loginPrefix: String) async throws {
         guard let token = accessToken else {
             throw URLError(.userAuthenticationRequired)
         }
         
         var components = URLComponents(string: "https://api.intra.42.fr/v2/users")!
         components.queryItems = [
-            URLQueryItem(name: "search[login]", value: loginPrefix)
+            URLQueryItem(name: "search[login]", value: loginPrefix),
         ]
-        
+
         var request = URLRequest(url: components.url!)
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
         let (data, response) = try await URLSession.shared.data(for: request)
         
-        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 401 {
-            self.logout()
-            throw URLError(.userAuthenticationRequired)
-        }
         
-        return try JSONDecoder().decode([UserProfile].self, from: data)
-    }
-    
-    private func logout() {
-        accessToken = nil
-        users = []
-        isAuthenticated = false
-        do {
-            try self.keychainManager.deleteToken(forKey: self.tokenKey)
-        } catch {
-            print(error)
+        if let httpResponse = response as? HTTPURLResponse {
+            switch httpResponse.statusCode {
+            case 200:
+                let decoder = try JSONDecoder().decode([UsersResearch].self, from: data)
+                await MainActor.run {
+                    self.users = decoder
+                    // Dans le Main thread car on met à jour une @Published Property Wrapper
+                }
+            case 401:
+                throw URLError(.userAuthenticationRequired)
+            case 429:
+                throw URLError(.resourceUnavailable)
+            default :
+                throw URLError(.badServerResponse)
+            }
         }
     }
     
-    public func removeUser(){
+    public func removeAllUser(){
         self.users.removeAll()
     }
 }

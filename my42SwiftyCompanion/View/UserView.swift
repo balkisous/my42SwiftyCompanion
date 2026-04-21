@@ -1,5 +1,5 @@
 //
-//  ProfileView.swift
+//  UserView.swift
 //  my42SwiftyCompanion
 //
 //  Created by Balkis on 29/01/2026.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ProfileView: View {
+struct UserView: View {
 
     let user: UserProfile
     @State var openAllProjects: Bool = false
@@ -56,7 +56,7 @@ struct ProfileView: View {
     }
 }
 
-extension ProfileView {
+extension UserView {
     
     // ---------------------- Header ----------------------
 
