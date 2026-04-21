@@ -8,7 +8,7 @@
 import Foundation
 
 // MARK: - Models
-struct UserProfile: Codable {
+struct UserProfile: Decodable {
     
     let login: String
     let email: String

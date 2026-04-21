@@ -23,7 +23,7 @@ class HomeViewModel : ObservableObject {
     private let clientSecret = Secrets.clientSecret
     
     private let tokenURL = "https://api.intra.42.fr/oauth/token"
-    private let apiURL = "https://api.intra.42.fr/v2/users"
+    private let apiUserURL = "https://api.intra.42.fr/v2/users"
     
     private var accessToken: String?
     
@@ -54,13 +54,13 @@ class HomeViewModel : ObservableObject {
         
         let bodyString = "grant_type=client_credentials&client_id=\(clientUID)&client_secret=\(clientSecret)"
         request.httpBody = bodyString.data(using: .utf8)
-                
+        
         let (data, _) = try await URLSession.shared.data(for: request)
         
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         let tokenResponse = try decoder.decode(TokenResponse.self, from: data)
-
+        
         self.accessToken = tokenResponse.accessToken
     }
     
@@ -69,11 +69,11 @@ class HomeViewModel : ObservableObject {
             throw URLError(.userAuthenticationRequired)
         }
         
-        var components = URLComponents(string: "https://api.intra.42.fr/v2/users")!
+        var components = URLComponents(string: apiUserURL)!
         components.queryItems = [
             URLQueryItem(name: "search[login]", value: loginPrefix),
         ]
-
+        
         var request = URLRequest(url: components.url!)
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
@@ -96,6 +96,32 @@ class HomeViewModel : ObservableObject {
                 throw URLError(.badServerResponse)
             }
         }
+    }
+    
+    func fetchUserProfile(id: Int) async throws -> UserProfile? {
+        guard let token = accessToken else {
+            throw URLError(.userAuthenticationRequired)
+        }
+
+        var request = URLRequest(url: URL(string: "\(apiUserURL)/\(id)")!)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            switch httpResponse.statusCode {
+            case 200:
+                let userProfile = try JSONDecoder().decode(UserProfile.self, from: data)
+                return userProfile
+            case 401:
+                throw URLError(.userAuthenticationRequired)
+            case 429:
+                throw URLError(.resourceUnavailable)
+            default :
+                throw URLError(.badServerResponse)
+            }
+        }
+        return nil
     }
     
     public func removeAllUser(){
