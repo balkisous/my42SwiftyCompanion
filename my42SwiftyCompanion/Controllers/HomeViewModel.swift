@@ -102,12 +102,16 @@ class HomeViewModel : ObservableObject {
         guard let token = accessToken else {
             throw URLError(.userAuthenticationRequired)
         }
-
-        var request = URLRequest(url: URL(string: "\(apiUserURL)/\(id)")!)
+        print("🔗 fetching user with id: \(id)")  // ← est-ce que l'id est correct ?
+            
+        let url = URL(string: "\(apiUserURL)/\(id)")!
+        print("🔗 URL: \(url)")  // ← url exacte
+        
+        var request = URLRequest(url: url)
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
         let (data, response) = try await URLSession.shared.data(for: request)
-        
+            
         if let httpResponse = response as? HTTPURLResponse {
             switch httpResponse.statusCode {
             case 200:

@@ -3,55 +3,65 @@
 //  my42SwiftyCompanion
 //
 //  Created by Balkis on 28/01/2026.
-//r
+//
 
 import Foundation
 
 // MARK: - Models
-struct UserProfile: Decodable {
+struct UserProfile: Decodable, Identifiable {
     
+    let id: Int
     let login: String
     let email: String
     let location: String?
-    let wallet: Int
-    let correctionPoint: Int
-    let image: UserImage
+    let wallet: Int?
+    let correctionPoint: Int?
+    let image: UserImage?
     let cursusUsers: [CursusUser]
     let projectsUsers: [ProjectUser]
     
     enum CodingKeys: String, CodingKey {
-        case login, email, location, wallet, image
+        case id, login, email, location, wallet, image
         case correctionPoint = "correction_point"
-        case cursusUsers = "cursus_users"
-        case projectsUsers = "projects_users"
+        case cursusUsers     = "cursus_users"
+        case projectsUsers   = "projects_users"
     }
     
     // Helpers
-    var level: Double { cursusUsers.first?.level ?? 0.0 }
+    var level: Double  { cursusUsers.first?.level ?? 0.0 }
     var skills: [Skill] { cursusUsers.first?.skills ?? [] }
-    var profileImage: String { image.versions.medium }
+    var profileImage: String { image?.versions?.medium ?? "" }
 }
 
-struct UserImage: Codable {
-    let versions: ImageVersions
+struct UserImage: Decodable {
+    let link: String?
+    let versions: ImageVersions?
 }
 
-struct ImageVersions: Codable {
-    let medium: String
+struct ImageVersions: Decodable {
+    let large: String?
+    let medium: String?
+    let small: String?
+    let micro: String?
 }
 
-struct CursusUser: Codable {
+struct CursusUser: Decodable {
     let level: Double
     let skills: [Skill]
+    let cursus: Cursus?
 }
 
-struct Skill: Codable {
+struct Cursus: Decodable {
+    let name: String
+}
+
+struct Skill: Decodable {
     let name: String
     let level: Double
-    var percentage: Double { (level / 20.0) * 100.0 }
+    var percentage: Double { min((level / 20.0) * 100.0, 100.0) }
 }
 
-struct ProjectUser: Codable, Identifiable {
+struct ProjectUser: Decodable, Identifiable {
     let id = UUID()
     let finalMark: Int?
     let validated: Bool?
@@ -64,40 +74,41 @@ struct ProjectUser: Codable, Identifiable {
     }
     
     var isPassed: Bool { validated == true }
-    var isFailed: Bool { validated == false }
+    var isFailed: Bool  { validated == false }
     
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.finalMark = try container.decodeIfPresent(Int.self, forKey: .finalMark)
         self.validated = try container.decodeIfPresent(Bool.self, forKey: .validated)
-        self.status = try container.decode(String.self, forKey: .status)
-        self.project = try container.decode(Project.self, forKey: .project)
+        self.status    = try container.decode(String.self, forKey: .status)
+        self.project   = try container.decode(Project.self, forKey: .project)
     }
 }
 
-struct Project: Codable {
+struct Project: Decodable {
     let name: String
 }
 
+
 // MARK: - Decoder Extension
-extension UserProfile {
-    static func decode(from data: Data) throws -> UserProfile {
-        let decoder = JSONDecoder()
-        return try decoder.decode(UserProfile.self, from: data)
-    }
-    
-    static func decode(from json: String) throws -> UserProfile {
-        guard let data = json.data(using: .utf8) else {
-            throw DecodingError.dataCorrupted(
-                DecodingError.Context(
-                    codingPath: [],
-                    debugDescription: "Cannot convert JSON string to Data"
-                )
-            )
-        }
-        return try decode(from: data)
-    }
-}
+//extension UserProfile {
+//    static func decode(from data: Data) throws -> UserProfile {
+//        let decoder = JSONDecoder()
+//        return try decoder.decode(UserProfile.self, from: data)
+//    }
+//    
+//    static func decode(from json: String) throws -> UserProfile {
+//        guard let data = json.data(using: .utf8) else {
+//            throw DecodingError.dataCorrupted(
+//                DecodingError.Context(
+//                    codingPath: [],
+//                    debugDescription: "Cannot convert JSON string to Data"
+//                )
+//            )
+//        }
+//        return try decode(from: data)
+//    }
+//}
 
 // MARK: - Utils
 extension UserProfile {

@@ -11,6 +11,7 @@ struct HomeView: View {
     
     @State var text: String = ""
     @StateObject var viewModel = HomeViewModel()
+    @State private var selectedUser: UserProfile? = nil
     
     var body: some View {
         
@@ -19,8 +20,12 @@ struct HomeView: View {
             topView
             
             textFieldView
+               
             
             Spacer()
+        }
+        .sheet(item: $selectedUser) { user in
+            UserView(user: user)
         }
     }
 
@@ -77,6 +82,7 @@ struct HomeView: View {
                                             do {
                                                 if let user = try await viewModel.fetchUserProfile(id: user.id) {
                                                     print("user fetch is \(user)")
+                                                    self.$selectedUser.wrappedValue = user
                                                 }
                                             }
                                             catch {

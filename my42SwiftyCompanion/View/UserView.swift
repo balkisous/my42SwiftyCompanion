@@ -11,7 +11,7 @@ struct UserView: View {
 
     let user: UserProfile
     @State var openAllProjects: Bool = false
-    @EnvironmentObject var authManager: Auth42Manager
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         VStack {
@@ -37,21 +37,6 @@ struct UserView: View {
                 }
                 .padding()
             }
-            Button("Log out") {
-                authManager.logout()
-            }
-            .font(.buttonFont)
-            .padding(.horizontal, 60)
-            .padding(.vertical, 10)
-            .foregroundColor(Colors.foregroundButtonColor.color)
-            .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Colors.backgroundbuttonColor.color)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Colors.foregroundButtonColor.color, lineWidth: 1)
-                        )
-                )
         }
     }
 }
