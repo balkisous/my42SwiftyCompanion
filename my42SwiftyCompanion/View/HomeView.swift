@@ -71,7 +71,18 @@ struct HomeView: View {
                                 ForEach(viewModel.users) { user in
                                     Button {
                                         // navigate to userView
+                                        print("user is \(user)")
                                         viewModel.removeAllUser()
+                                        Task {
+                                            do {
+                                                if let user = try await viewModel.fetchUserProfile(id: user.id) {
+                                                    print("user fetch is \(user)")
+                                                }
+                                            }
+                                            catch {
+                                                print("Error from Fetching user profile: \(error)")
+                                            }
+                                        }
                                     } label: {
                                         HStack {
                                             Text(user.login)
