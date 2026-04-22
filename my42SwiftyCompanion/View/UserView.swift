@@ -157,7 +157,7 @@ extension UserView {
                 Text(skill.name)
                     .foregroundColor(Colors.skillFiledColor.color)
                 Spacer()
-                Text("\(String(format: "%.1f%%", skill.percentage))")
+                Text("\(String(format: "level: %.1f%", skill.level))")
                     .foregroundColor(Colors.foregroundColorGray.color)
             }
             .font(.bodyFont)
