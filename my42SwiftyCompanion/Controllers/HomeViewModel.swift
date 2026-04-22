@@ -26,6 +26,7 @@ class HomeViewModel : ObservableObject {
     private let apiUserURL = "https://api.intra.42.fr/v2/users"
     
     private var accessToken: String?
+    private var searchTask: Task<Void, Never>?
     
     init() {
         Task {
@@ -33,7 +34,7 @@ class HomeViewModel : ObservableObject {
                 try await self.fetchAccessToken()
             }
             catch {
-                print("Error to fecthch access token: \(error)")
+                print("Error to fetch access token: \(error)")
             }
         }
         
@@ -41,6 +42,22 @@ class HomeViewModel : ObservableObject {
     
     deinit {
         self.users = []
+    }
+    
+    
+    func search(login: String) {
+        searchTask?.cancel()
+        
+        guard login.count >= 2 else {
+            users = []
+            return
+        }
+        
+        searchTask = Task {
+            try? await Task.sleep(for: .seconds(0.5))
+            guard !Task.isCancelled else { return }
+            try? await fetchUsers(loginPrefix: login)
+        }
     }
     
     private func fetchAccessToken() async throws {
@@ -53,6 +70,7 @@ class HomeViewModel : ObservableObject {
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         
         let bodyString = "grant_type=client_credentials&client_id=\(clientUID)&client_secret=\(clientSecret)"
+        
         request.httpBody = bodyString.data(using: .utf8)
         
         let (data, _) = try await URLSession.shared.data(for: request)
@@ -102,10 +120,8 @@ class HomeViewModel : ObservableObject {
         guard let token = accessToken else {
             throw URLError(.userAuthenticationRequired)
         }
-        print("🔗 fetching user with id: \(id)")  // ← est-ce que l'id est correct ?
             
         let url = URL(string: "\(apiUserURL)/\(id)")!
-        print("🔗 URL: \(url)")  // ← url exacte
         
         var request = URLRequest(url: url)
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")

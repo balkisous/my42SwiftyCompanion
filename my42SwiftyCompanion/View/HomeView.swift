@@ -57,15 +57,13 @@ struct HomeView: View {
         TextField("Search 42 Users", text: $text)
             .textFieldStyle(RoundedBorderTextFieldStyle())
             .font(.bodyMediumFont)
-            .onChange(of: text, { _ , _ in
+            .onChange(of: text, { _ , newValue in
                 if text.isEmpty {
-//                        print("view model user before is \(viewModel.users)")
+                    print("view model user before is \(viewModel.users)")
                     viewModel.removeAllUser()
-//                        print("view model user after is \(viewModel.users)")
+                    print("view model user after is \(viewModel.users)")
                 } else {
-                    Task {
-                        try await viewModel.fetchUsers(loginPrefix: text)
-                    }
+                    viewModel.search(login: newValue)
                 }
             })
             .overlay(alignment: .topLeading) {

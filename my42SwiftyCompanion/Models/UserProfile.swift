@@ -31,6 +31,14 @@ struct UserProfile: Decodable, Identifiable {
     var level: Double  { cursusUsers.first?.level ?? 0.0 }
     var skills: [Skill] { cursusUsers.first?.skills ?? [] }
     var profileImage: String { image?.versions?.medium ?? "" }
+    
+    var userIsInCursus: CursusUser {
+        if self.cursusUsers.count > 1 {
+            return self.cursusUsers[1]
+        } else {
+            return self.cursusUsers[0]
+        }
+    }
 }
 
 struct UserImage: Decodable {
