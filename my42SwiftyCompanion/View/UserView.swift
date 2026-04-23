@@ -86,7 +86,7 @@ extension UserView {
                     .font(.bodyMediumFont)
                     .foregroundColor(Colors.foregroundColorText.color)
                 let user = user.userIsInCursus
-                Text("Level \(String(format: "%.1f%%", user.level))")
+                Text("Level \(String(format: "%.2f", user.level))")
                     .foregroundColor(Colors.foregroundColorText.color)
                     .font(.bodyMediumFont)
             }
@@ -132,26 +132,19 @@ extension UserView {
 
     
     // ---------------------- Skills ----------------------
-
-    var userSkills : some View {
+    
+    var userSkills: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Skills")
                 .foregroundColor(Colors.titleColor.color)
                 .font(.subheadlineFont)
             
-            let user = user.userIsInCursus
+            let skills = user.userIsInCursus.skills
+            let displayed = openAllSkills ? skills : Array(skills.prefix(5))
             
-            ForEach(user.skills.prefix(5), id: \.name) { skill in
+            ForEach(displayed, id: \.name) { skill in
                 skillRow(for: skill)
-            }
-            .transition(.opacity.combined(with: .move(edge: .top)))
-
-            
-            if openAllSkills {
-                ForEach(user.skills.dropFirst(5), id: \.name) { skill in
-                    skillRow(for: skill)
-                }
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                    .transition(.opacity.combined(with: .move(edge: .top)))
             }
             
             chevronSkillsButton
@@ -166,14 +159,14 @@ extension UserView {
                     .foregroundColor(Colors.skillFiledColor.color)
                     .font(.bodyFont)
                 Spacer()
-                Text("\(String(format: "level: %.1f", skill.level))")
+                Text("\(String(format: "level: %.2f", skill.level))")
                     .foregroundColor(Colors.foregroundColorGray.color)
                     .font(.bodyMediumFont)
             }
             
             
             ProgressView(value: skill.percentage, total: 100) {
-                Text("\(String(format: "%.1f%%", skill.percentage))")
+                Text("\(String(format: "%.2f%%", skill.percentage))")
                     .foregroundColor(Colors.skillFiledColor.color)
                     .font(.captionFont)
             }
@@ -218,7 +211,6 @@ extension UserView {
     
     func projectInfos(for project: ProjectUser) -> some View {
         HStack {
-            let _ = print("project user is \(project)")
             let status = user.projectStatus(for: project)
             Text("\(status) - \(project.project.name)")
                 .foregroundColor(Colors.foregroundColorText.color)

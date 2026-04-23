@@ -35,8 +35,9 @@ struct UserProfile: Decodable, Identifiable {
     var profileImage: String { image?.versions?.medium ?? "" }
     
     var userIsInCursus: CursusUser {
-        if self.cursusUsers.count > 1 {
-            return self.cursusUsers[1]
+        if let cursus = self.cursusUsers.first(where: {$0.cursus?.name == "42cursus" })
+        {
+            return cursus
         } else {
             return self.cursusUsers[0]
         }
