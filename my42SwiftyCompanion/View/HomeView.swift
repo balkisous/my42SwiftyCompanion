@@ -40,6 +40,14 @@ struct HomeView: View {
         } message: {
             Text(viewModel.errorMessage ?? "Unknown Error")
         }
+        .alert("No Results", isPresented: $viewModel.noResults) {
+            Button("OK", role: .cancel) {
+                text = ""
+                viewModel.removeAllUser()
+            }
+        } message: {
+            Text("No user found for \"\(text)\"")
+        }
     }
     
     // MARK: Views
@@ -81,7 +89,7 @@ struct HomeView: View {
             .overlay(alignment: .topLeading) {
                 
                 Group {
-                    if !text.isEmpty && text.count <= 2 {
+                    if !text.isEmpty && viewModel.users.isEmpty {
                         HStack {
                             Spacer()
                             ProgressView()

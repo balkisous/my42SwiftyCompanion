@@ -13,6 +13,8 @@ class HomeViewModel : ObservableObject {
     @Published var users: [UsersResearch] = []
     @Published var isError = false
     @Published var errorMessage: String? = nil
+    @Published var noResults = false
+    private var tokenExpiresAt: Date?
     private var cache: [String: [UsersResearch]] = [:]
     
     private var keychainManager = KeychainManager.instance // -> A voir si on le garde ou pas
@@ -31,6 +33,8 @@ class HomeViewModel : ObservableObject {
         Task {
             do {
                 try await self.fetchAccessToken()
+//                 throw URLError(.notConnectedToInternet)
+//                 -> to test alert error feature
             }
             catch {
                 print("Error to fetch access token: \(error)")
@@ -47,8 +51,68 @@ class HomeViewModel : ObservableObject {
         self.users = []
     }
     
+    // ---------------------- Token ----------------------
+
+    private func validToken() async throws -> String {
+        if let token = accessToken,
+           let expiresAt = tokenExpiresAt,
+           Date() < expiresAt.addingTimeInterval(-60) {
+            return token
+        }
+        try await fetchAccessToken()
+        return accessToken!
+    }
+
+    private func executeWithTokenRefresh<T>(_ request: (String) async throws -> T) async throws -> T {
+        let token = try await validToken()
+        do {
+            return try await request(token)
+        } catch let error as URLError where error.code == .userAuthenticationRequired {
+            // 401 reçu → on force le refresh et on retry une fois
+            print("token has been expired, refreshing...")
+            try await fetchAccessToken()
+            return try await request(accessToken!)
+        }
+    }
+    
+    private func fetchAccessToken() async throws {
+        
+        let url = URL(string: tokenURL)!
+        
+        var request = URLRequest(url: url)
+        
+        request.httpMethod = "POST"
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        
+        let bodyString = "grant_type=client_credentials&client_id=\(clientUID)&client_secret=\(clientSecret)"
+        
+        request.httpBody = bodyString.data(using: .utf8)
+        
+        let (data, _) = try await URLSession.shared.data(for: request)
+        
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let tokenResponse = try decoder.decode(TokenResponse.self, from: data)
+        
+        self.accessToken = tokenResponse.accessToken
+        self.tokenExpiresAt = Date().addingTimeInterval(TimeInterval(tokenResponse.expiresIn))
+        
+//        self.tokenExpiresAt = Date().addingTimeInterval(-1)
+//        -> test for expire token
+        
+    }
+        
+    // ----------------------------------------------------------------
+
+    
+    // ---------------------- Fetch Search Users ----------------------
     
     func search(login: String) {
+//        self.isError = true
+//        self.errorMessage = "Test Error message"
+//        return
+//         -> to test alert error feature
+
         searchTask?.cancel()
         
         guard login.count >= 2 else {
@@ -72,32 +136,7 @@ class HomeViewModel : ObservableObject {
                }
         }
     }
-    
-    private var currentDataTask: URLSessionDataTask?
 
-
-    
-    private func fetchAccessToken() async throws {
-        
-        let url = URL(string: tokenURL)!
-        
-        var request = URLRequest(url: url)
-        
-        request.httpMethod = "POST"
-        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        
-        let bodyString = "grant_type=client_credentials&client_id=\(clientUID)&client_secret=\(clientSecret)"
-        
-        request.httpBody = bodyString.data(using: .utf8)
-        
-        let (data, _) = try await URLSession.shared.data(for: request)
-        
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        let tokenResponse = try decoder.decode(TokenResponse.self, from: data)
-        
-        self.accessToken = tokenResponse.accessToken
-    }
     
     func fetchUsers(loginPrefix: String) async throws {
            
@@ -106,65 +145,72 @@ class HomeViewModel : ObservableObject {
             return
         }
         
-        guard let token = accessToken else {
-            throw URLError(.userAuthenticationRequired)
-        }
-        
-        var components = URLComponents(string: apiUserURL)!
-        components.queryItems = [
-            URLQueryItem(name: "search[login]", value: loginPrefix),
-            URLQueryItem(name: "page[size]", value: "10")
-        ]
-        
-        var request = URLRequest(url: components.url!)
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.timeoutInterval = 10
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        if let httpResponse = response as? HTTPURLResponse {
-            switch httpResponse.statusCode {
-            case 200:
-                let decoder = try JSONDecoder().decode([UsersResearch].self, from: data)
-                await MainActor.run {
-                    self.cache[loginPrefix] = decoder
-                    self.users = decoder
+        try await executeWithTokenRefresh { token in
+            
+            var components = URLComponents(string: apiUserURL)!
+            components.queryItems = [
+                URLQueryItem(name: "search[login]", value: loginPrefix),
+                URLQueryItem(name: "page[size]", value: "10")
+            ]
+            
+            var request = URLRequest(url: components.url!)
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            request.timeoutInterval = 10
+            
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                switch httpResponse.statusCode {
+                case 200:
+                    let decoder = try JSONDecoder().decode([UsersResearch].self, from: data)
+                    await MainActor.run {
+                        self.cache[loginPrefix] = decoder
+                        self.users = decoder
+                        self.noResults = decoder.isEmpty
+                    }
+                case 401:
+                    throw URLError(.userAuthenticationRequired)
+                case 429:
+                    throw URLError(.resourceUnavailable)
+                default :
+                    throw URLError(.badServerResponse)
                 }
-            case 401:
-                throw URLError(.userAuthenticationRequired)
-            case 429:
-                throw URLError(.resourceUnavailable)
-            default :
-                throw URLError(.badServerResponse)
             }
         }
     }
     
+    // ----------------------------------------------------------------
+
+    
+    // ---------------------- Fetch User Profile ----------------------
+    
     func fetchUserProfile(id: Int) async throws -> UserProfile? {
-        guard let token = accessToken else {
-            throw URLError(.userAuthenticationRequired)
-        }
-        
-        let url = URL(string: "\(apiUserURL)/\(id)")!
-        
-        var request = URLRequest(url: url)
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        if let httpResponse = response as? HTTPURLResponse {
-            switch httpResponse.statusCode {
-            case 200:
-                let userProfile = try JSONDecoder().decode(UserProfile.self, from: data)
-                return userProfile
-            case 401:
+        try await executeWithTokenRefresh { token in
+            guard let token = accessToken else {
                 throw URLError(.userAuthenticationRequired)
-            case 429:
-                throw URLError(.resourceUnavailable)
-            default :
-                throw URLError(.badServerResponse)
             }
+            
+            let url = URL(string: "\(apiUserURL)/\(id)")!
+            
+            var request = URLRequest(url: url)
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            
+            let (data, response) = try await URLSession.shared.data(for: request)
+            if let httpResponse = response as? HTTPURLResponse {
+                switch httpResponse.statusCode {
+                case 200:
+                    let userProfile = try JSONDecoder().decode(UserProfile.self, from: data)
+                    return userProfile
+                case 401:
+                    throw URLError(.userAuthenticationRequired)
+                case 429:
+                    throw URLError(.resourceUnavailable)
+                default :
+                    throw URLError(.badServerResponse)
+                }
+            }
+            return nil
         }
-        return nil
     }
     
     public func removeAllUser(){

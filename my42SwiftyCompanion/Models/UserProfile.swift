@@ -101,27 +101,6 @@ struct Project: Decodable {
     let name: String
 }
 
-
-// MARK: - Decoder Extension
-//extension UserProfile {
-//    static func decode(from data: Data) throws -> UserProfile {
-//        let decoder = JSONDecoder()
-//        return try decoder.decode(UserProfile.self, from: data)
-//    }
-//    
-//    static func decode(from json: String) throws -> UserProfile {
-//        guard let data = json.data(using: .utf8) else {
-//            throw DecodingError.dataCorrupted(
-//                DecodingError.Context(
-//                    codingPath: [],
-//                    debugDescription: "Cannot convert JSON string to Data"
-//                )
-//            )
-//        }
-//        return try decode(from: data)
-//    }
-//}
-
 // MARK: - Utils
 extension UserProfile {
     func projectStatus(for project: ProjectUser) -> String {
