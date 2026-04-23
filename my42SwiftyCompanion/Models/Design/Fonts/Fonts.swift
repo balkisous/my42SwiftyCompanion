@@ -29,7 +29,7 @@ extension Font {
         }
         
         static var captionFont: Font {
-            .system(size: 14, weight: .regular, design: .rounded)
+            .system(size: 14, weight: .regular, design: .serif)
         }
         
         static var buttonFont: Font {

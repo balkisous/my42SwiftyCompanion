@@ -11,10 +11,9 @@ import SwiftUI
 class HomeViewModel : ObservableObject {
     
     @Published var users: [UsersResearch] = []
-    var isAuthenticated = false // -> I think is not neccessary
-    var isLoading = false // for what ??
-    var errorMessage: String? = nil
-    var isError = false
+    @Published var isError = false
+    @Published var errorMessage: String? = nil
+    private var cache: [String: [UsersResearch]] = [:]
     
     private var keychainManager = KeychainManager.instance // -> A voir si on le garde ou pas
     private let tokenKey = "authentificationToken" // -> A voir si on le garde ou pas
@@ -35,6 +34,10 @@ class HomeViewModel : ObservableObject {
             }
             catch {
                 print("Error to fetch access token: \(error)")
+                await MainActor.run {
+                    self.isError = true
+                    errorMessage = error.localizedDescription
+                }
             }
         }
         
@@ -54,11 +57,25 @@ class HomeViewModel : ObservableObject {
         }
         
         searchTask = Task {
-            try? await Task.sleep(for: .seconds(0.5))
-            guard !Task.isCancelled else { return }
-            try? await fetchUsers(loginPrefix: login)
+            do {
+                   try await Task.sleep(for: .seconds(0.3))
+                   try await fetchUsers(loginPrefix: login)
+               } catch is CancellationError {
+                   return
+               } catch let error as URLError where error.code == .cancelled {
+                   return
+               } catch {
+                   await MainActor.run {
+                       self.isError = true
+                       self.errorMessage = error.localizedDescription
+                   }
+               }
         }
     }
+    
+    private var currentDataTask: URLSessionDataTask?
+
+
     
     private func fetchAccessToken() async throws {
         
@@ -83,6 +100,12 @@ class HomeViewModel : ObservableObject {
     }
     
     func fetchUsers(loginPrefix: String) async throws {
+           
+        if let cached = cache[loginPrefix] {
+            await MainActor.run { self.users = cached }
+            return
+        }
+        
         guard let token = accessToken else {
             throw URLError(.userAuthenticationRequired)
         }
@@ -90,21 +113,22 @@ class HomeViewModel : ObservableObject {
         var components = URLComponents(string: apiUserURL)!
         components.queryItems = [
             URLQueryItem(name: "search[login]", value: loginPrefix),
+            URLQueryItem(name: "page[size]", value: "10")
         ]
         
         var request = URLRequest(url: components.url!)
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.timeoutInterval = 10
         
         let (data, response) = try await URLSession.shared.data(for: request)
-        
         
         if let httpResponse = response as? HTTPURLResponse {
             switch httpResponse.statusCode {
             case 200:
                 let decoder = try JSONDecoder().decode([UsersResearch].self, from: data)
                 await MainActor.run {
+                    self.cache[loginPrefix] = decoder
                     self.users = decoder
-                    // Dans le Main thread car on met à jour une @Published Property Wrapper
                 }
             case 401:
                 throw URLError(.userAuthenticationRequired)
@@ -120,14 +144,13 @@ class HomeViewModel : ObservableObject {
         guard let token = accessToken else {
             throw URLError(.userAuthenticationRequired)
         }
-            
+        
         let url = URL(string: "\(apiUserURL)/\(id)")!
         
         var request = URLRequest(url: url)
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
         let (data, response) = try await URLSession.shared.data(for: request)
-            
         if let httpResponse = response as? HTTPURLResponse {
             switch httpResponse.statusCode {
             case 200:

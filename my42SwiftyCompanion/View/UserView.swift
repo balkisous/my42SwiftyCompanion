@@ -99,7 +99,11 @@ extension UserView {
 
     var userInfos: some View {
         VStack(alignment: .leading, spacing: 8) {
-            InfoRow(icon: "📍", text: user.location ?? "Offline")
+            if user.alumni == true {
+                InfoRow(icon: "🎓", text: "Alumni")
+            } else {
+                InfoRow(icon: "📍", text: user.location ?? "Offline")
+            }
             if let wallet = user.wallet {
                 InfoRow(icon: "💰", text: "Wallet: \(wallet) ₳")
             }
@@ -156,15 +160,33 @@ extension UserView {
             HStack {
                 Text(skill.name)
                     .foregroundColor(Colors.skillFiledColor.color)
+                    .font(.bodyFont)
                 Spacer()
-                Text("\(String(format: "level: %.1f%", skill.level))")
+                Text("\(String(format: "level: %.1f", skill.level))")
                     .foregroundColor(Colors.foregroundColorGray.color)
+                    .font(.bodyMediumFont)
             }
-            .font(.bodyFont)
-            ProgressView(value: skill.percentage, total: 100)
+            
+            
+            ProgressView(value: skill.percentage, total: 100) {
+                Text("\(String(format: "%.1f%%", skill.percentage))")
+                    .foregroundColor(Colors.skillFiledColor.color)
+                    .font(.captionFont)
+            }
                 .tint(Colors.skillFiledColor.color)
         }
 
+    }
+    
+    var chevronSkillsButton: some View {
+        HStack {
+            Spacer()
+            
+            Button("", systemImage: openAllSkills ? "chevron.up" : "chevron.down") {
+                openAllSkills.toggle()
+            }
+            .foregroundColor(Colors.skillFiledColor.color)
+        }
     }
 
     // ---------------------- Projects ----------------------
@@ -174,15 +196,11 @@ extension UserView {
                 .foregroundColor(Colors.foregroundColorText.color)
                 .font(.subheadlineFont)
             
-            ForEach(Array(user.projectsUsers.prefix(5))) { project in
-                projectInfos(for: project)
-            }
+            let projects = filteredProjects
+            let displayed = openAllProjects ? projects : Array(projects.prefix(5))
             
-            if openAllProjects {
-                ForEach(user.projectsUsers, id: \.id) { project in
-                    projectInfos(for: project)
-                }
-                .transition(.opacity.combined(with: .move(edge: .top)))
+            ForEach(displayed) { project in
+                projectInfos(for: project)
             }
             
                 
@@ -193,6 +211,7 @@ extension UserView {
     
     func projectInfos(for project: ProjectUser) -> some View {
         HStack {
+            let _ = print("project user is \(project)")
             let status = user.projectStatus(for: project)
             Text("\(status) - \(project.project.name)")
                 .foregroundColor(Colors.foregroundColorText.color)
@@ -214,21 +233,25 @@ extension UserView {
         }
     }
     
-    var chevronSkillsButton: some View {
-        HStack {
-            Spacer()
-            
-            Button("", systemImage: openAllSkills ? "chevron.up" : "chevron.down") {
-                openAllSkills.toggle()
+    var filteredProjects: [ProjectUser] {
+        let has42Cursus = user.projectsUsers.contains { $0.cursusIds.contains(21) }
+        
+        let filtered = user.projectsUsers.filter { project in
+            if has42Cursus {
+                return project.cursusIds.contains(21)
+            } else {
+                return true
             }
-            .foregroundColor(Colors.skillFiledColor.color)
         }
+        
+        var seen = Set<Int>()
+        return filtered.filter { seen.insert($0.id).inserted }
     }
     // ---------------------------------------------------
 }
 
 #Preview {
-    var user = UserProfile(id: 75980, login: "bben-yaa", email: "bben-yaa@student.42.fr", location: nil, wallet: 650, correctionPoint: 2, image: UserImage(link: "https://cdn.intra.42.fr/users/7f2711f31bea8caf489d89a2b1705a5d/bben-yaa.jpg", versions: nil), cursusUsers: [CursusUser(level: 6.46, skills: [Skill(name: "Unix", level: 7.13), Skill(name: "Unix", level: 7.13), Skill(name: "Unix", level: 7.13), Skill(name: "Unix", level: 7.13), Skill(name: "Unix", level: 7.13), Skill(name: "Unix", level: 7.13), Skill(name: "Unix", level: 7.13)], cursus: Cursus(name: ""))], projectsUsers: [])
+    var user = UserProfile(id: 75980, login: "bben-yaa", email: "bben-yaa@student.42.fr", location: nil, wallet: 650, correctionPoint: 2, image: UserImage(link: "https://cdn.intra.42.fr/users/7f2711f31bea8caf489d89a2b1705a5d/bben-yaa.jpg", versions: nil), cursusUsers: [CursusUser(level: 6.46, skills: [Skill(name: "Unix", level: 7.13), Skill(name: "Unix", level: 7.13), Skill(name: "Unix", level: 7.13), Skill(name: "Unix", level: 7.13), Skill(name: "Unix", level: 7.13), Skill(name: "Unix", level: 7.13), Skill(name: "Unix", level: 7.13)], cursus: Cursus(name: ""))], projectsUsers: [], alumni: false)
     UserView(user: user)
 }
 

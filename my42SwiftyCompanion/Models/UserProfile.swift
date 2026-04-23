@@ -19,12 +19,14 @@ struct UserProfile: Decodable, Identifiable {
     let image: UserImage?
     let cursusUsers: [CursusUser]
     let projectsUsers: [ProjectUser]
+    let alumni: Bool?
     
     enum CodingKeys: String, CodingKey {
         case id, login, email, location, wallet, image
         case correctionPoint = "correction_point"
         case cursusUsers     = "cursus_users"
         case projectsUsers   = "projects_users"
+        case alumni          = "alumni?"
     }
     
     // Helpers
@@ -70,19 +72,19 @@ struct Skill: Decodable {
 }
 
 struct ProjectUser: Decodable, Identifiable {
-    let id = UUID()
+    let id: Int
     let finalMark: Int?
     let validated: Bool?
     let status: String
     let project: Project
+    let cursusIds: [Int]
     
     enum CodingKeys: String, CodingKey {
-        case validated, status, project
+        case status, project, id
+        case validated = "validated?"
         case finalMark = "final_mark"
+        case cursusIds  = "cursus_ids"
     }
-    
-    var isPassed: Bool { validated == true }
-    var isFailed: Bool  { validated == false }
     
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -90,6 +92,8 @@ struct ProjectUser: Decodable, Identifiable {
         self.validated = try container.decodeIfPresent(Bool.self, forKey: .validated)
         self.status    = try container.decode(String.self, forKey: .status)
         self.project   = try container.decode(Project.self, forKey: .project)
+        self.id        = try container.decode(Int.self, forKey: .id)
+        self.cursusIds = try container.decode([Int].self, forKey: .cursusIds)
     }
 }
 
@@ -121,6 +125,9 @@ struct Project: Decodable {
 // MARK: - Utils
 extension UserProfile {
     func projectStatus(for project: ProjectUser) -> String {
+        if project.validated == false {
+            return "❌"
+        }
         switch project.status {
         case "finished":
             return "✅"
@@ -128,6 +135,8 @@ extension UserProfile {
             return "⏸️"
         case "in_progress":
             return "⏳"
+        case "searching_a_group":
+            return "🔍"
         default:
             return "📊"
         }
