@@ -27,16 +27,28 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				Secrets.xcconfig.exemple,
 			);
 			target = C4E774F62F1171A80030B4AB /* my42SwiftyCompanion */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		7CB49D242F9B768700C2ED62 /* Exceptions for "my42SwiftyCompanion" folder in "Compile Sources" phase from "my42SwiftyCompanion" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = C4E774F32F1171A80030B4AB /* Sources */;
+			membershipExceptions = (
+				Secrets.xcconfig.exemple,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C4E774F92F1171A80030B4AB /* my42SwiftyCompanion */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				7CF1B5672F28D698004A8801 /* Exceptions for "my42SwiftyCompanion" folder in "my42SwiftyCompanion" target */,
+				7CB49D242F9B768700C2ED62 /* Exceptions for "my42SwiftyCompanion" folder in "Compile Sources" phase from "my42SwiftyCompanion" target */,
 			);
 			path = my42SwiftyCompanion;
 			sourceTree = "<group>";
