@@ -147,7 +147,9 @@ extension UserView {
                     .transition(.opacity.combined(with: .move(edge: .top)))
             }
             
-            chevronSkillsButton
+            if skills.count > 5 {
+                chevronSkillsButton
+            }
         }
         .animation(.interactiveSpring(duration: 0.3), value: openAllSkills)
     }
@@ -203,8 +205,9 @@ extension UserView {
                 projectInfos(for: project)
             }
             
-                
-            chevronProjectsButton
+            if projects.count > 5 {
+                chevronProjectsButton
+            }
         }
         .animation(.interactiveSpring(duration: 0.3), value: openAllProjects)
     }

@@ -68,7 +68,7 @@ struct HomeView: View {
                 .foregroundStyle(.tint)
                 .cornerRadius(10)
             
-            Text("Look for your 42Friends")
+            Text("Look up for your 42Friends")
                 .font(.bodyMediumFont)
                 .foregroundColor(Colors.foregroundColorText.color)
         }

@@ -16,10 +16,7 @@ class HomeViewModel : ObservableObject {
     @Published var noResults = false
     private var tokenExpiresAt: Date?
     private var cache: [String: [UsersResearch]] = [:]
-    
-    private var keychainManager = KeychainManager.instance // -> A voir si on le garde ou pas
-    private let tokenKey = "authentificationToken" // -> A voir si on le garde ou pas
-    
+        
     private let clientUID = Secrets.clientUID
     private let clientSecret = Secrets.clientSecret
     
@@ -186,9 +183,6 @@ class HomeViewModel : ObservableObject {
     
     func fetchUserProfile(id: Int) async throws -> UserProfile? {
         try await executeWithTokenRefresh { token in
-            guard let token = accessToken else {
-                throw URLError(.userAuthenticationRequired)
-            }
             
             let url = URL(string: "\(apiUserURL)/\(id)")!
             
