@@ -19,13 +19,20 @@ struct HomeView: View {
     
     var body: some View {
         
-        VStack(alignment: .center, spacing: 15) {
-            
-            topView
-            
-            textFieldView
-            
-            Spacer()
+        ZStack {
+            Color.clear
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
+            VStack(alignment: .center, spacing: 15) {
+                
+                topView
+                
+                textFieldView
+                
+                Spacer()
+            }
         }
         .sheet(item: $selectedUser, onDismiss: {
             text = ""
@@ -47,6 +54,9 @@ struct HomeView: View {
             }
         } message: {
             Text("No user found for \"\(text)\"")
+        }
+        .onTapGesture {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
     }
     

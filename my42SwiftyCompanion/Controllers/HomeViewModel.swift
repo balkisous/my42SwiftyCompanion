@@ -54,20 +54,24 @@ class HomeViewModel : ObservableObject {
         if let token = accessToken,
            let expiresAt = tokenExpiresAt,
            Date() < expiresAt.addingTimeInterval(-60) {
+            print("token still valid")
             return token
         }
+        print("token expired → fetching new one...")
         try await fetchAccessToken()
         return accessToken!
     }
 
     private func executeWithTokenRefresh<T>(_ request: (String) async throws -> T) async throws -> T {
         let token = try await validToken()
+        print("using token: \(token.prefix(10))...")
         do {
             return try await request(token)
         } catch let error as URLError where error.code == .userAuthenticationRequired {
             // 401 reçu → on force le refresh et on retry une fois
-            print("token has been expired, refreshing...")
+            print("401 received → refreshing token...")
             try await fetchAccessToken()
+            print("token refreshed: \(accessToken!.prefix(10))...")
             return try await request(accessToken!)
         }
     }
