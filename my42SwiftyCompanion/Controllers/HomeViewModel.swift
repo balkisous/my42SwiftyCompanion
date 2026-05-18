@@ -109,10 +109,6 @@ class HomeViewModel : ObservableObject {
     // ---------------------- Fetch Search Users ----------------------
     
     func search(login: String) {
-//        self.isError = true
-//        self.errorMessage = "Test Error message"
-//        return
-//         -> to test alert error feature
 
         searchTask?.cancel()
         
@@ -160,6 +156,9 @@ class HomeViewModel : ObservableObject {
             
             let (data, response) = try await URLSession.shared.data(for: request)
             
+//            throw URLError(.userAuthenticationRequired)
+//              -> to test alert error feature
+
             if let httpResponse = response as? HTTPURLResponse {
                 switch httpResponse.statusCode {
                 case 200:
